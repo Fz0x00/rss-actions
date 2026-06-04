@@ -1,0 +1,15 @@
+name: Trigger Dashboard Deploy
+
+on:
+  repository_dispatch:
+    types: [data-changed]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy workflow
+        run: |
+          gh workflow run deploy.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}

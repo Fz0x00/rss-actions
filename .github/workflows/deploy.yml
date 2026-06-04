@@ -1,0 +1,68 @@
+name: Deploy Dashboard
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [data-updated]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout rss-dashboard (for HTML templates)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.DASHBOARD_REPO }}
+          token: ${{ secrets.DATA_REPO_PAT }}
+
+      - name: Checkout rss-data (for databases)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.DATA_REPO }}
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: rss-data
+
+      - name: Download rss-export
+        run: |
+          gh release download --repo ${{ secrets.DASHBOARD_REPO }} \
+            --pattern 'rss-export-linux-amd64' --output rss-export --clobber
+          chmod +x rss-export
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
+
+      - name: Export dashboard data
+        id: export
+        run: |
+          mkdir -p _deploy
+          cp index.html _deploy/
+          cp source.html _deploy/
+          cp article.html _deploy/
+          ./rss-export export \
+            --db rss-data/data/rss.db \
+            --articles-db rss-data/data/articles.db \
+            --output _deploy 2>&1 | tee export-output.txt
+          if grep -q "VERSION_UNCHANGED" export-output.txt; then
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.export.outputs.skip_deploy != 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy _deploy --project-name=rss-dashboard
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
