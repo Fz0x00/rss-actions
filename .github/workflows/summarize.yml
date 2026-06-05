@@ -3,12 +3,14 @@ name: Summarize Articles
 on:
   schedule:
     - cron: '30 */4 * * *'
+  repository_dispatch:
+    types: [articles-fetched]
   workflow_dispatch:
     inputs:
-      limit:
-        description: 'Max articles to process'
+      time-limit:
+        description: 'Runtime window in minutes'
         required: false
-        default: '30'
+        default: '25'
       platform:
         description: 'LLM platform (glm/groq/cerebras)'
         required: false
@@ -33,7 +35,7 @@ jobs:
 
       - name: Run summarizer
         run: |
-          ARGS="--limit ${{ github.event.inputs.limit || '30' }} --delay 0.5"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --delay 0.5"
           if [ -n "${{ github.event.inputs.platform }}" ]; then
             ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
           fi

@@ -46,3 +46,11 @@ jobs:
               if git push; then break; fi
             fi
           done
+
+      - name: Trigger summarize
+        if: success()
+        run: |
+          gh workflow run summarize.yml --repo ${{ github.repository }} \
+            -f time-limit=25
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
