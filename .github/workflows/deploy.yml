@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout rss-dashboard (for HTML templates)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ secrets.DASHBOARD_REPO }}
           token: ${{ secrets.DATA_REPO_PAT }}
 
       - name: Checkout rss-data (for databases)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ secrets.DATA_REPO }}
           token: ${{ secrets.DATA_REPO_PAT }}
@@ -58,7 +58,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         if: steps.export.outputs.skip_deploy != 'true'
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
