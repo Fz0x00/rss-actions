@@ -1,0 +1,62 @@
+name: Summarize Articles
+
+on:
+  schedule:
+    - cron: '30 */4 * * *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max articles to process'
+        required: false
+        default: '30'
+      platform:
+        description: 'LLM platform (glm/groq/cerebras)'
+        required: false
+        default: ''
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout data repo
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ secrets.DATA_REPO }}
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: data
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Run summarizer
+        run: |
+          ARGS="--limit ${{ github.event.inputs.limit || '30' }} --delay 0.5"
+          if [ -n "${{ github.event.inputs.platform }}" ]; then
+            ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
+          fi
+          python3 data/scripts/summarize.py $ARGS
+        working-directory: data
+
+      - name: Commit and push updated data
+        run: |
+          cd data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/articles.db data/key.db
+          git diff --cached --quiet || git commit -m "auto: summarize articles with LLM"
+          for i in 1 2 3; do
+            if git pull --rebase origin main; then
+              if git push; then break; fi
+            else
+              git rebase --abort 2>/dev/null || true
+              git pull origin main --no-rebase || true
+              git checkout --theirs data/articles.db 2>/dev/null || true
+              git checkout --theirs data/key.db 2>/dev/null || true
+              git add data/articles.db data/key.db
+              git diff --cached --quiet || git commit -m "auto: summarize articles with LLM (retry $i)"
+              if git push; then break; fi
+            fi
+          done
