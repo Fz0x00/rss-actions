@@ -39,7 +39,7 @@ jobs:
           if [ -n "${{ github.event.inputs.platform }}" ]; then
             ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
           fi
-          python3 data/scripts/summarize.py $ARGS
+          python3 scripts/summarize.py $ARGS
         working-directory: data
 
       - name: Commit and push updated data
