@@ -35,7 +35,7 @@ jobs:
 
       - name: Run summarizer
         run: |
-          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --delay 0.5"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --delay 1.5"
           if [ -n "${{ github.event.inputs.platform }}" ]; then
             ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
           fi
