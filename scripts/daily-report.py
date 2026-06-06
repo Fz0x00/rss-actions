@@ -66,13 +66,15 @@ def extract_articles_count(jobs):
     return None
 
 
-def format_report(runs):
+def format_report(runs, repo_owner, repo_name):
     """格式化报告"""
     if not runs:
         return "📊 过去 24 小时没有 workflow 运行记录"
     
-    # 按 workflow 分组
+    # 按 workflow 分组，并记录失败的 run
     workflows = {}
+    failed_runs = []
+    
     for run in runs:
         name = run.get("name", "Unknown")
         if name not in workflows:
@@ -90,6 +92,8 @@ def format_report(runs):
         status = run.get("status", "")
         conclusion = run.get("conclusion", "")
         event = run.get("event", "unknown")
+        run_id = run.get("databaseId", "")
+        created_at = run.get("createdAt", "")
         
         if status == "in_progress":
             wf["in_progress"] += 1
@@ -97,6 +101,13 @@ def format_report(runs):
             wf["success"] += 1
         elif conclusion == "failure":
             wf["failure"] += 1
+            # 记录失败详情
+            failed_runs.append({
+                "name": name,
+                "id": run_id,
+                "time": created_at,
+                "event": event
+            })
         
         wf["triggers"][event] = wf["triggers"].get(event, 0) + 1
     
@@ -118,6 +129,17 @@ def format_report(runs):
         report_lines.append(f"  触发: {trigger_str}")
         report_lines.append("")
     
+    # 失败记录详情
+    if failed_runs:
+        report_lines.append("❌ 失败记录:")
+        for fr in failed_runs:
+            time_short = fr['time'][:16].replace('T', ' ') if fr['time'] else 'N/A'
+            run_url = f"https://github.com/{repo_owner}/{repo_name}/actions/runs/{fr['id']}"
+            report_lines.append(f"  • {fr['name']} ({fr['event']})")
+            report_lines.append(f"    时间: {time_short}")
+            report_lines.append(f"    链接: {run_url}")
+        report_lines.append("")
+    
     # 总计
     total_runs = sum(wf["total"] for wf in workflows.values())
     total_success = sum(wf["success"] for wf in workflows.values())
@@ -125,8 +147,9 @@ def format_report(runs):
     
     report_lines.append("📈 总计")
     report_lines.append(f"  运行: {total_runs} 次")
-    report_lines.append(f"  成功: {total_success} 次")
-    report_lines.append(f"  失败: {total_failure} 次")
+    report_lines.append(f"  ✅ 成功: {total_success} 次")
+    if total_failure > 0:
+        report_lines.append(f"  ❌ 失败: {total_failure} 次")
     
     return "\n".join(report_lines)
 
@@ -186,7 +209,7 @@ def main():
     runs = get_workflow_runs(repo_owner, repo_name, since_time)
     print(f"   找到 {len(runs)} 条记录")
     
-    report = format_report(runs)
+    report = format_report(runs, repo_owner, repo_name)
     print("\n" + report)
     
     print("\n📤 发送到飞书...")
