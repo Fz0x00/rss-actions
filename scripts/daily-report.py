@@ -183,8 +183,11 @@ def send_to_feishu(webhook_url, report_text):
             else:
                 print(f"❌ 飞书发送失败: {result}", file=sys.stderr)
                 return False
+    except urllib.error.HTTPError as e:
+        print(f"❌ 飞书发送失败: HTTP {e.code}", file=sys.stderr)
+        return False
     except Exception as e:
-        print(f"❌ 飞书发送异常: {e}", file=sys.stderr)
+        print(f"❌ 飞书发送异常: {type(e).__name__}", file=sys.stderr)
         return False
 
 
