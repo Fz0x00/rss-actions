@@ -53,4 +53,4 @@ jobs:
           gh workflow run summarize.yml --repo ${{ github.repository }} \
             -f time-limit=25
         env:
-          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
