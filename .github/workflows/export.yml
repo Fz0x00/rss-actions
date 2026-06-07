@@ -4,6 +4,9 @@ on:
   repository_dispatch:
     types: [data-changed]
 
+permissions:
+  actions: write
+
 jobs:
   trigger:
     runs-on: ubuntu-latest
