@@ -3,6 +3,7 @@ name: Summarize Articles
 on:
   schedule:
     - cron: '30 */4 * * *'
+    - cron: '0,30 18-21 * * *'
   repository_dispatch:
     types: [articles-fetched]
   workflow_dispatch:
