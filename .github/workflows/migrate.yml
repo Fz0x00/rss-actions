@@ -8,6 +8,10 @@ on:
         required: false
         default: 'data/accounts.json'
 
+concurrency:
+  group: rss-data-accounts-db
+  cancel-in-progress: false
+
 jobs:
   migrate:
     runs-on: ubuntu-latest

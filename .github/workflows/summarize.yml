@@ -2,20 +2,29 @@ name: Summarize Articles
 
 on:
   schedule:
-    - cron: '30 */4 * * *'
-    - cron: '0,30 18-21 * * *'
-  repository_dispatch:
-    types: [articles-fetched]
+    - cron: '30 */6 * * *'
   workflow_dispatch:
     inputs:
       time-limit:
         description: 'Runtime window in minutes'
         required: false
         default: '25'
+      article-limit:
+        description: 'Maximum articles to summarize per run'
+        required: false
+        default: '50'
       platform:
         description: 'LLM platform (glm/groq/cerebras)'
         required: false
         default: ''
+      key-type:
+        description: 'Only use keys with this key_type (free/coding_plan/paid)'
+        required: false
+        default: 'free'
+
+concurrency:
+  group: rss-data-articles-db
+  cancel-in-progress: false
 
 jobs:
   summarize:
@@ -36,9 +45,12 @@ jobs:
 
       - name: Run summarizer
         run: |
-          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --delay 1.5"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --limit ${{ github.event.inputs.article-limit || '50' }} --delay 1.5"
           if [ -n "${{ github.event.inputs.platform }}" ]; then
             ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
+          fi
+          if [ -n "${{ github.event.inputs.key-type || 'free' }}" ]; then
+            ARGS="$ARGS --key-type ${{ github.event.inputs.key-type || 'free' }}"
           fi
           python3 scripts/summarize.py $ARGS
         working-directory: data
@@ -48,7 +60,7 @@ jobs:
           cd data
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/articles.db data/key.db
+          git add data/articles.db data/key.db data/token.db
           git diff --cached --quiet || git commit -m "auto: summarize articles with LLM"
           for i in 1 2 3; do
             if git pull --rebase origin main; then
@@ -58,7 +70,8 @@ jobs:
               git pull origin main --no-rebase || true
               git checkout --theirs data/articles.db 2>/dev/null || true
               git checkout --theirs data/key.db 2>/dev/null || true
-              git add data/articles.db data/key.db
+              git checkout --theirs data/token.db 2>/dev/null || true
+              git add data/articles.db data/key.db data/token.db
               git diff --cached --quiet || git commit -m "auto: summarize articles with LLM (retry $i)"
               if git push; then break; fi
             fi

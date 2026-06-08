@@ -6,8 +6,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
+  contents: read
+
+concurrency:
+  group: rss-data-articles-db
+  cancel-in-progress: false
 
 jobs:
   fetch:
@@ -50,11 +53,3 @@ jobs:
               if git push; then break; fi
             fi
           done
-
-      - name: Trigger summarize
-        if: success()
-        run: |
-          gh workflow run summarize.yml --repo ${{ github.repository }} \
-            -f time-limit=25
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
