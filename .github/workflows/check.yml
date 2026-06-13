@@ -28,6 +28,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
 
+      - name: Run sync
+        run: ./rss-check sync --db data/data/rss.db --articles-db data/data/articles.db
+
       - name: Run check
         run: ./rss-check check --db data/data/rss.db --concurrency 20
 
