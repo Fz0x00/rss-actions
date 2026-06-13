@@ -46,6 +46,7 @@ jobs:
           cp index.html _deploy/
           cp source.html _deploy/
           cp article.html _deploy/
+          cp admin.html _deploy/
           ./rss-export export \
             --db rss-data/data/rss.db \
             --articles-db rss-data/data/articles.db \
