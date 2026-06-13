@@ -20,13 +20,27 @@ jobs:
           token: ${{ secrets.DATA_REPO_PAT }}
           path: data
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Checkout followfetch repo
+        uses: actions/checkout@v5
         with:
-          python-version: '3.13'
+          repository: Detect-DefenseLab/rssFollow
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: rssFollow
+          submodules: false
+          fetch-depth: 1
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: rssFollow/packages/rss-followfetch/go.sum
+
+      - name: Build followfetch
+        run: go build -o followfetch ./packages/rss-followfetch
+        working-directory: rssFollow
 
       - name: Run recompute
-        run: python3 scripts/score_recompute.py --rss-db data/data/rss.db --articles-db data/data/articles.db
+        run: ../rssFollow/followfetch score --rss-db data/data/rss.db --articles-db data/data/articles.db
+        working-directory: data
 
       - name: Commit and push updated data
         run: |

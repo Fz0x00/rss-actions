@@ -38,10 +38,23 @@ jobs:
           token: ${{ secrets.DATA_REPO_PAT }}
           path: data
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Checkout followfetch repo
+        uses: actions/checkout@v5
         with:
-          python-version: '3.13'
+          repository: Detect-DefenseLab/rssFollow
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: rssFollow
+          submodules: false
+          fetch-depth: 1
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: rssFollow/packages/rss-followfetch/go.sum
+
+      - name: Build followfetch
+        run: go build -o followfetch ./packages/rss-followfetch
+        working-directory: rssFollow
 
       - name: Run summarizer
         run: |
@@ -52,7 +65,11 @@ jobs:
           if [ -n "${{ github.event.inputs.key-type || 'free' }}" ]; then
             ARGS="$ARGS --key-type ${{ github.event.inputs.key-type || 'free' }}"
           fi
-          python3 scripts/summarize.py $ARGS
+          ../rssFollow/followfetch summarize \
+            --articles-db data/data/articles.db \
+            --key-db data/data/key.db \
+            --token-db data/data/token.db \
+            $ARGS
         working-directory: data
 
       - name: Commit and push updated data

@@ -12,20 +12,34 @@ jobs:
       actions: read
       contents: read
     steps:
-      - name: Checkout private scripts repo
+      - name: Checkout data repo
         uses: actions/checkout@v5
         with:
           repository: ${{ secrets.DATA_REPO }}
           token: ${{ secrets.DATA_REPO_PAT }}
           path: private
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Checkout followfetch repo
+        uses: actions/checkout@v5
         with:
-          python-version: '3.13'
+          repository: Detect-DefenseLab/rssFollow
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: rssFollow
+          submodules: false
+          fetch-depth: 1
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: rssFollow/packages/rss-followfetch/go.sum
+
+      - name: Build followfetch
+        run: go build -o followfetch ./packages/rss-followfetch
+        working-directory: rssFollow
 
       - name: Generate and send daily report
-        run: python3 private/scripts/daily-report.py
+        run: ../rssFollow/followfetch report
+        working-directory: private
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
