@@ -1,24 +1,22 @@
-name: Deploy Dashboard
+name: Deploy Admin Dashboard
 
 on:
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '30 */4 * * *'
   workflow_dispatch:
-  repository_dispatch:
-    types: [data-updated]
 
 permissions:
   contents: read
 
 concurrency:
-  group: deploy
+  group: deploy-admin
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout rss-dashboard (for HTML templates)
+      - name: Checkout rss-dashboard (for admin.html)
         uses: actions/checkout@v5
         with:
           repository: ${{ secrets.DASHBOARD_REPO }}
@@ -39,30 +37,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
 
-      - name: Export dashboard data
-        id: export
+      - name: Export admin data
         run: |
           mkdir -p _deploy
-          cp index.html _deploy/
-          cp source.html _deploy/
-          cp article.html _deploy/
+          cp admin.html _deploy/
           ./rss-export export \
             --db rss-data/data/rss.db \
             --articles-db rss-data/data/articles.db \
-            --output _deploy 2>&1 | tee export-output.txt
-          if grep -q "VERSION_UNCHANGED" export-output.txt; then
-            echo "skip_deploy=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip_deploy=false" >> $GITHUB_OUTPUT
-          fi
+            --output _deploy
 
-      - name: Deploy to Cloudflare Pages
-        if: steps.export.outputs.skip_deploy != 'true'
+      - name: Deploy to Cloudflare Pages (rss-admin)
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: pages deploy _deploy --project-name=rss-dashboard
+          command: pages deploy _deploy --project-name=rss-admin
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
