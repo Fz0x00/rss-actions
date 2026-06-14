@@ -41,20 +41,18 @@ jobs:
       - name: Checkout followfetch repo
         uses: actions/checkout@v5
         with:
-          repository: Detect-DefenseLab/rssFollow
+          repository: Detect-DefenseLab/rss-followfetch
           token: ${{ secrets.DATA_REPO_PAT }}
-          path: rssFollow
-          submodules: false
-          fetch-depth: 1
+          path: followfetch
 
       - uses: actions/setup-go@v5
         with:
           go-version: '1.26'
-          cache-dependency-path: rssFollow/packages/rss-followfetch/go.sum
+          cache-dependency-path: followfetch/go.sum
 
       - name: Build followfetch
-        run: go build -o followfetch ./packages/rss-followfetch
-        working-directory: rssFollow
+        run: go build -o followfetch-build .
+        working-directory: followfetch
 
       - name: Run summarizer
         run: |
@@ -65,10 +63,10 @@ jobs:
           if [ -n "${{ github.event.inputs.key-type || 'free' }}" ]; then
             ARGS="$ARGS --key-type ${{ github.event.inputs.key-type || 'free' }}"
           fi
-          ../rssFollow/followfetch summarize \
-            --articles-db data/data/articles.db \
-            --key-db data/data/key.db \
-            --token-db data/data/token.db \
+          ../followfetch/followfetch-build summarize \
+            --articles-db data/articles.db \
+            --key-db data/key.db \
+            --token-db data/token.db \
             $ARGS
         working-directory: data
 
