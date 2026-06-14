@@ -64,9 +64,9 @@ jobs:
             ARGS="$ARGS --key-type ${{ github.event.inputs.key-type || 'free' }}"
           fi
           ../followfetch/followfetch-build summarize \
-            --articles-db data/data/articles.db \
-            --key-db data/data/key.db \
-            --token-db data/data/token.db \
+            --articles-db data/articles.db \
+            --key-db data/key.db \
+            --token-db data/token.db \
             $ARGS
         working-directory: data
 
