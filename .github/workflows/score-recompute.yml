@@ -37,7 +37,7 @@ jobs:
         working-directory: followfetch
 
       - name: Run recompute
-        run: ../followfetch/followfetch-build score --rss-db data/rss.db --articles-db data/articles.db
+        run: ../followfetch/followfetch-build score -db data/rss.db -articles-db data/articles.db
         working-directory: data
 
       - name: Commit and push updated data
