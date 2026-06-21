@@ -22,7 +22,7 @@ jobs:
       - name: Checkout followfetch repo
         uses: actions/checkout@v5
         with:
-          repository: Detect-DefenseLab/rss-followfetch
+          repository: ${{ github.repository_owner }}/rss-followfetch
           token: ${{ secrets.DATA_REPO_PAT }}
           path: followfetch
 
