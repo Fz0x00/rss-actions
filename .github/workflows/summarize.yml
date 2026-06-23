@@ -61,7 +61,9 @@ jobs:
       - name: Checkout tabbit-proxy
         if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
         run: |
-          git clone https://x-access-token:${{ secrets.DATA_REPO_PAT }}@github.com/${{ github.repository_owner }}/tabbit-proxy.git tabbit-proxy
+          gh repo clone ${{ github.repository_owner }}/tabbit-proxy tabbit-proxy
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
 
       - name: Install tabbit dependencies
         if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
