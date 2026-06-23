@@ -59,12 +59,9 @@ jobs:
         if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
 
       - name: Checkout tabbit-proxy
-        uses: actions/checkout@v5
         if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
-        with:
-          repository: ${{ github.repository_owner }}/tabbit-proxy
-          token: ${{ secrets.DATA_REPO_PAT }}
-          path: tabbit-proxy
+        run: |
+          git clone https://x-access-token:${{ secrets.DATA_REPO_PAT }}@github.com/${{ github.repository_owner }}/tabbit-proxy.git tabbit-proxy
 
       - name: Install tabbit dependencies
         if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
