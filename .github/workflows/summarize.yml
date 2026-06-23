@@ -14,7 +14,7 @@ on:
         required: false
         default: '50'
       platform:
-        description: 'LLM platform (glm/groq/cerebras)'
+        description: 'LLM platform (glm/groq/cerebras/tabbit)'
         required: false
         default: ''
       key-type:
@@ -54,6 +54,42 @@ jobs:
         run: go build -o followfetch-build .
         working-directory: followfetch
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
+
+      - name: Checkout tabbit-proxy
+        uses: actions/checkout@v5
+        if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
+        with:
+          repository: ${{ github.repository_owner }}/tabbit-proxy
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: tabbit-proxy
+
+      - name: Install tabbit dependencies
+        if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
+        run: bun install
+        working-directory: tabbit-proxy
+
+      - name: Start tabbit proxy
+        if: ${{ github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free' }}
+        run: |
+          nohup bun run tabbit_proxy.ts > tabbit_proxy.log 2>&1 &
+          echo $! > .tabbit_proxy.pid
+          echo "TABBIT_PID=$(cat .tabbit_proxy.pid)" >> $GITHUB_ENV
+          # 等待服务启动
+          for i in {1..30}; do
+            if curl -s http://localhost:8800/health > /dev/null 2>&1; then
+              echo "Tabbit proxy ready"
+              break
+            fi
+            sleep 1
+          done
+          curl -s http://localhost:8800/health
+        working-directory: tabbit-proxy
+        env:
+          TABBIT_TOKEN: ${{ secrets.TABBIT_TOKEN }}
+
       - name: Run summarizer
         run: |
           ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --limit ${{ github.event.inputs.article-limit || '50' }} --delay 1.5"
@@ -69,6 +105,18 @@ jobs:
             --token-db data/token.db \
             $ARGS
         working-directory: data
+
+      - name: Stop tabbit proxy
+        if: always() && (github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free')
+        run: |
+          if [ -f .tabbit_proxy.pid ]; then
+            PID=$(cat .tabbit_proxy.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              echo "Stopping tabbit proxy (PID: $PID)"
+              kill "$PID"
+            fi
+          fi
+        working-directory: tabbit-proxy
 
       - name: Commit and push updated data
         run: |
