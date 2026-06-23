@@ -37,8 +37,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
 
-      - name: Install wrangler
-        run: npm install wrangler@4
+      - name: Install dependencies
+        run: npm install esbuild wrangler@4
 
       - name: Export admin data
         run: |
