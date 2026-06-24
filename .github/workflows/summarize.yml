@@ -108,6 +108,8 @@ jobs:
       - name: Stop tabbit proxy
         if: always() && (github.event.inputs.platform == 'tabbit' || github.event.inputs.key-type == 'free')
         run: |
+          echo "=== Tabbit Proxy Logs ==="
+          cat tabbit_proxy.log 2>/dev/null || true
           if [ -f .tabbit_proxy.pid ]; then
             PID=$(cat .tabbit_proxy.pid)
             if kill -0 "$PID" 2>/dev/null; then
