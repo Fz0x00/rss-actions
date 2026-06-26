@@ -10,9 +10,9 @@ on:
         required: false
         default: '25'
       article-limit:
-        description: 'Maximum articles to summarize per run'
+        description: 'Maximum articles to summarize per run (0=unlimited, time-limit controls)'
         required: false
-        default: '50'
+        default: '0'
       platform:
         description: 'LLM platform (glm/groq/cerebras/tabbit)'
         required: false
@@ -91,7 +91,10 @@ jobs:
 
       - name: Run summarizer
         run: |
-          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --limit ${{ github.event.inputs.article-limit || '50' }} --delay 1.5"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '25' }} --delay 1.5"
+          if [ -n "${{ github.event.inputs.article-limit }}" ] && [ "${{ github.event.inputs.article-limit }}" != "0" ]; then
+            ARGS="$ARGS --limit ${{ github.event.inputs.article-limit }}"
+          fi
           if [ -n "${{ github.event.inputs.platform }}" ]; then
             ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
           fi
