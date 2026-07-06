@@ -8,7 +8,7 @@ on:
       time-limit:
         description: 'Runtime window in minutes'
         required: false
-        default: '50'
+        default: '45'
       article-limit:
         description: 'Maximum articles to summarize per run (0=unlimited, time-limit controls)'
         required: false
@@ -91,7 +91,7 @@ jobs:
 
       - name: Run summarizer
         run: |
-          ARGS="--time-limit ${{ github.event.inputs.time-limit || '50' }} --workers-per-key 2"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '45' }} --workers-per-key 2"
           if [ -n "${{ github.event.inputs.article-limit }}" ] && [ "${{ github.event.inputs.article-limit }}" != "0" ]; then
             ARGS="$ARGS --limit ${{ github.event.inputs.article-limit }}"
           fi
