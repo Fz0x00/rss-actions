@@ -85,8 +85,8 @@ jobs:
             sleep 1
           done
           curl -s http://127.0.0.1:8800/health
-          # 修复 key.db: localhost → 127.0.0.1 避免 IPv6 解析问题，重置错误计数
-          sqlite3 ../data/data/key.db "UPDATE api_keys SET base_url = replace(base_url, 'localhost', '127.0.0.1'), error_count = 0, last_error = NULL WHERE platform = 'tabbit';" 2>/dev/null || true
+          # 修复 key.db: localhost → 127.0.0.1 避免 IPv6 解析问题，重置错误计数和激活状态
+          sqlite3 ../data/data/key.db "UPDATE api_keys SET base_url = replace(base_url, 'localhost', '127.0.0.1'), is_active = 1, error_count = 0, last_error = NULL WHERE platform = 'tabbit';" 2>/dev/null || true
         working-directory: tabbit-proxy
 
       - name: Run summarizer
