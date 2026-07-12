@@ -46,7 +46,7 @@ jobs:
           cp admin.html _deploy/
           ./rss-export export \
             --db rss-data/data/rss.db \
-            --articles-db rss-data/data/articles.db \
+            --articles-db rss-data/data/articles_$(date -u +%Y_%m).db \
             --output _deploy
 
       - name: Deploy to Cloudflare Pages (rss-admin)

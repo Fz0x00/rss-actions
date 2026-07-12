@@ -39,17 +39,18 @@ jobs:
           cd data
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/articles.db
-          git diff --cached --quiet || git commit -m "auto: update articles.db after fetch"
+          MONTH=$(date -u +%Y_%m)
+          git add "data/articles_${MONTH}.db"
+          git diff --cached --quiet || git commit -m "auto: update articles_${MONTH}.db after fetch"
           for i in 1 2 3; do
             if git pull --rebase origin main; then
               if git push; then break; fi
             else
               git rebase --abort 2>/dev/null || true
               git pull origin main --no-rebase || true
-              git checkout --theirs data/articles.db 2>/dev/null || true
-              git add data/articles.db
-              git diff --cached --quiet || git commit -m "auto: update articles.db after fetch (retry $i)"
+              git checkout --theirs "data/articles_${MONTH}.db" 2>/dev/null || true
+              git add "data/articles_${MONTH}.db"
+              git diff --cached --quiet || git commit -m "auto: update articles_${MONTH}.db after fetch (retry $i)"
               if git push; then break; fi
             fi
           done

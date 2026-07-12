@@ -56,7 +56,7 @@ jobs:
         run: |
           ./rss-export export \
             --db rss-data/data/rss.db \
-            --articles-db rss-data/data/articles.db \
+            --articles-db rss-data/data/articles_$(date -u +%Y_%m).db \
             --output _deploy 2>&1 | tee export-output.txt
           if grep -q "VERSION_UNCHANGED" export-output.txt; then
             echo "skip_deploy=true" >> $GITHUB_OUTPUT

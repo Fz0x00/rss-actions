@@ -127,7 +127,8 @@ jobs:
           cd data
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/articles.db data/key.db data/token.db
+          MONTH=$(date -u +%Y_%m)
+          git add "data/articles_${MONTH}.db" data/key.db data/token.db
           git diff --cached --quiet || git commit -m "auto: summarize articles with LLM"
           for i in 1 2 3; do
             if git pull --rebase origin main; then
@@ -135,10 +136,10 @@ jobs:
             else
               git rebase --abort 2>/dev/null || true
               git pull origin main --no-rebase || true
-              git checkout --theirs data/articles.db 2>/dev/null || true
+              git checkout --theirs "data/articles_${MONTH}.db" 2>/dev/null || true
               git checkout --theirs data/key.db 2>/dev/null || true
               git checkout --theirs data/token.db 2>/dev/null || true
-              git add data/articles.db data/key.db data/token.db
+              git add "data/articles_${MONTH}.db" data/key.db data/token.db
               git diff --cached --quiet || git commit -m "auto: summarize articles with LLM (retry $i)"
               if git push; then break; fi
             fi
