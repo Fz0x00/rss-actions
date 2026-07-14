@@ -70,6 +70,7 @@ jobs:
           npx wrangler r2 object put rss-dashboard-data/articles-data.json \
             --file _deploy/articles-data.json \
             --content-type application/json \
+            --cache-control "public, max-age=300" \
             --remote
           rm -f _deploy/articles-data.json
         env:
