@@ -14,7 +14,7 @@ on:
         required: false
         default: '0'
       platform:
-        description: 'LLM platform (glm/groq/cerebras/tabbit)'
+        description: 'LLM platform (gemini/glm/etc.)'
         required: false
         default: ''
       key-type:
@@ -54,42 +54,9 @@ jobs:
         run: go build -o followfetch-build .
         working-directory: followfetch
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        if: ${{ github.event.inputs.platform == 'tabbit' || (github.event.inputs.key-type || 'free') == 'free' }}
-
-      - name: Checkout tabbit-proxy
-        if: ${{ github.event.inputs.platform == 'tabbit' || (github.event.inputs.key-type || 'free') == 'free' }}
-        run: |
-          gh repo clone ${{ github.repository_owner }}/tabbit-proxy tabbit-proxy
-        env:
-          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
-
-      - name: Install tabbit dependencies
-        if: ${{ github.event.inputs.platform == 'tabbit' || (github.event.inputs.key-type || 'free') == 'free' }}
-        run: bun install
-        working-directory: tabbit-proxy
-
-      - name: Start tabbit proxy
-        if: ${{ github.event.inputs.platform == 'tabbit' || (github.event.inputs.key-type || 'free') == 'free' }}
-        run: |
-          nohup bun run tabbit_proxy.ts > tabbit_proxy.log 2>&1 &
-          echo $! > .tabbit_proxy.pid
-          echo "TABBIT_PID=$(cat .tabbit_proxy.pid)" >> $GITHUB_ENV
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:8800/health > /dev/null 2>&1; then
-              echo "Tabbit proxy ready"
-              break
-            fi
-            sleep 1
-          done
-          curl -s http://127.0.0.1:8800/health
-          sqlite3 ../data/data/key.db "UPDATE api_keys SET base_url = replace(base_url, 'localhost', '127.0.0.1'), is_active = 1, error_count = 0, last_error = NULL WHERE platform = 'tabbit';" 2>/dev/null || true
-        working-directory: tabbit-proxy
-
       - name: Run summarizer
         run: |
-          ARGS="--time-limit ${{ github.event.inputs.time-limit || '45' }} --workers-per-key 2"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '45' }} --workers-per-key 1"
           if [ -n "${{ github.event.inputs.article-limit }}" ] && [ "${{ github.event.inputs.article-limit }}" != "0" ]; then
             ARGS="$ARGS --limit ${{ github.event.inputs.article-limit }}"
           fi
@@ -105,20 +72,6 @@ jobs:
             --token-db data/token.db \
             $ARGS
         working-directory: data
-
-      - name: Stop tabbit proxy
-        if: always() && (github.event.inputs.platform == 'tabbit' || (github.event.inputs.key-type || 'free') == 'free')
-        run: |
-          echo "=== Tabbit Proxy Logs ==="
-          cat tabbit_proxy.log 2>/dev/null || true
-          if [ -f .tabbit_proxy.pid ]; then
-            PID=$(cat .tabbit_proxy.pid)
-            if kill -0 "$PID" 2>/dev/null; then
-              echo "Stopping tabbit proxy (PID: $PID)"
-              kill "$PID"
-            fi
-          fi
-        working-directory: tabbit-proxy
 
       - name: Commit and push updated data
         run: |
