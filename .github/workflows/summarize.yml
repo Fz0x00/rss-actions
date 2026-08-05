@@ -56,7 +56,7 @@ jobs:
 
       - name: Run summarizer
         run: |
-          ARGS="--time-limit ${{ github.event.inputs.time-limit || '45' }} --workers-per-key 1"
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '45' }} --workers-per-key 3"
           if [ -n "${{ github.event.inputs.article-limit }}" ] && [ "${{ github.event.inputs.article-limit }}" != "0" ]; then
             ARGS="$ARGS --limit ${{ github.event.inputs.article-limit }}"
           fi
