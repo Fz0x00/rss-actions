@@ -52,6 +52,14 @@ jobs:
           
           ./rss-stats aggregate $ARGS
 
+      - name: Upload to R2
+        run: |
+          wrangler r2 object put rss-dashboard-data/daily_stats.json \
+            --file data/data/daily_stats.json --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
       - name: Commit and push
         run: |
           cd data
