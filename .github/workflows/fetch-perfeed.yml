@@ -37,17 +37,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           MONTH=$(date -u +%Y_%m)
-          git add "data/articles_${MONTH}.db"
-          git diff --cached --quiet || git commit -m "auto: update articles_${MONTH}.db after perfeed fetch"
-          for i in 1 2 3; do
-            if git pull --rebase origin main; then
-              if git push; then break; fi
+          if [ -f "data/articles_${MONTH}.db" ]; then
+            git add "data/articles_${MONTH}.db"
+            if git diff --cached --quiet; then
+              echo "No changes to commit"
             else
-              git rebase --abort 2>/dev/null || true
-              git pull origin main --no-rebase || true
-              git checkout --theirs "data/articles_${MONTH}.db" 2>/dev/null || true
-              git add "data/articles_${MONTH}.db"
-              git diff --cached --quiet || git commit -m "auto: update articles_${MONTH}.db after perfeed fetch (retry $i)"
-              if git push; then break; fi
+              git commit -m "auto: update articles_${MONTH}.db after perfeed fetch"
+              for i in 1 2 3; do
+                if git pull --rebase origin main; then
+                  if git push; then break; fi
+                else
+                  git rebase --abort 2>/dev/null || true
+                  git pull origin main --no-rebase || true
+                  git checkout --theirs "data/articles_${MONTH}.db" 2>/dev/null || true
+                  git add "data/articles_${MONTH}.db"
+                  git diff --cached --quiet || git commit -m "auto: update articles_${MONTH}.db after perfeed fetch (retry $i)"
+                  if git push; then break; fi
+                fi
+              done
             fi
-          done
+          else
+            echo "No articles file for month ${MONTH} found"
+          fi

@@ -79,7 +79,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           MONTH=$(date -u +%Y_%m)
-          git add "data/articles_${MONTH}.db" data/key.db data/token.db
+          FILES_TO_ADD="data/key.db data/token.db"
+          if [ -f "data/articles_${MONTH}.db" ]; then
+            FILES_TO_ADD="data/articles_${MONTH}.db $FILES_TO_ADD"
+          fi
+          git add $FILES_TO_ADD
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
