@@ -9,6 +9,10 @@ on:
         description: '统计最近多少天'
         required: false
         default: '30'
+      since:
+        description: '导出此日期之后的文章 (格式: 2006-01-02，留空则导出今日)'
+        required: false
+        default: ''
 
 concurrency:
   group: rss-stats
@@ -52,10 +56,35 @@ jobs:
           
           ./rss-stats aggregate $ARGS
 
+      - name: Export new articles
+        run: |
+          MONTH=$(date -u +%Y_%m)
+          PREV_MONTH=$(date -u -d '1 month ago' +%Y_%m 2>/dev/null || date -u -v-1m +%Y_%m)
+          
+          ARTICLES_DB=""
+          if [ -f "data/data/articles_${MONTH}.db" ]; then
+            ARTICLES_DB="data/data/articles_${MONTH}.db"
+          elif [ -f "data/data/articles_${PREV_MONTH}.db" ]; then
+            ARTICLES_DB="data/data/articles_${PREV_MONTH}.db"
+          else
+            ARTICLES_DB="data/data/articles.db"
+          fi
+          
+          SINCE="${{ github.event.inputs.since }}"
+          ARGS="--articles-db $ARTICLES_DB --output data/data/new_articles.json"
+          
+          if [ -n "$SINCE" ]; then
+            ARGS="$ARGS --since $SINCE"
+          fi
+          
+          ./rss-stats export $ARGS
+
       - name: Upload to R2
         run: |
           wrangler r2 object put rss-dashboard-data/daily_stats.json \
             --file data/data/daily_stats.json --remote
+          wrangler r2 object put rss-dashboard-data/new_articles.json \
+            --file data/data/new_articles.json --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
@@ -65,11 +94,11 @@ jobs:
           cd data
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/daily_stats.json
+          git add data/daily_stats.json data/new_articles.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "stats: update daily_stats.json ($(date -u '+%Y-%m-%d %H:%M') UTC)"
+            git commit -m "stats: update daily_stats.json and new_articles.json ($(date -u '+%Y-%m-%d %H:%M') UTC)"
             for i in 1 2 3; do
               if git push; then break; fi
               echo "Push failed, retry $i..."
