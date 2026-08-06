@@ -1,0 +1,70 @@
+name: Aggregate Stats
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每6小时
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '统计最近多少天'
+        required: false
+        default: '30'
+
+concurrency:
+  group: rss-stats
+  cancel-in-progress: false
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout rss-data
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rss-data
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: data
+
+      - name: Download rss-stats
+        run: |
+          gh release download --repo ${{ github.repository_owner }}/rss-stats \
+            --pattern 'rss-stats-linux-amd64' --output rss-stats --clobber
+          chmod +x rss-stats
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
+
+      - name: Run aggregate
+        run: |
+          DAYS=${{ github.event.inputs.days || '30' }}
+          # 聚合当月和上月的 articles DB
+          MONTH=$(date -u +%Y_%m)
+          PREV_MONTH=$(date -u -d '1 month ago' +%Y_%m 2>/dev/null || date -u -v-1m +%Y_%m)
+          
+          ARGS="--days $DAYS --output data/data/daily_stats.json"
+          
+          if [ -f "data/data/articles_${MONTH}.db" ]; then
+            ARGS="$ARGS --articles-db data/data/articles_${MONTH}.db"
+          elif [ -f "data/data/articles_${PREV_MONTH}.db" ]; then
+            ARGS="$ARGS --articles-db data/data/articles_${PREV_MONTH}.db"
+          else
+            ARGS="$ARGS --articles-db data/data/articles.db"
+          fi
+          
+          ./rss-stats aggregate $ARGS
+
+      - name: Commit and push
+        run: |
+          cd data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/daily_stats.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "stats: update daily_stats.json ($(date -u '+%Y-%m-%d %H:%M') UTC)"
+            for i in 1 2 3; do
+              if git push; then break; fi
+              echo "Push failed, retry $i..."
+              sleep 5
+            done
+          fi
