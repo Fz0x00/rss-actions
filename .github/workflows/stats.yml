@@ -79,11 +79,14 @@ jobs:
           
           ./rss-stats export $ARGS
 
+      - name: Install wrangler
+        run: npm install wrangler@4
+
       - name: Upload to R2
         run: |
-          wrangler r2 object put rss-dashboard-data/daily_stats.json \
+          npx wrangler r2 object put rss-dashboard-data/daily_stats.json \
             --file data/data/daily_stats.json --remote
-          wrangler r2 object put rss-dashboard-data/new_articles.json \
+          npx wrangler r2 object put rss-dashboard-data/new_articles.json \
             --file data/data/new_articles.json --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
