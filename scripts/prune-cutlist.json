@@ -1,0 +1,1033 @@
+{
+ "cut_urls": [
+  "https://4sysops.com/feed",
+  "https://aisnakeoil.substack.com/feed",
+  "https://api.theregister.com/api/v1/article?orderby=published&site_id=2&remapper=rss&query=tag:security",
+  "https://arthurchiao.art/feed.xml",
+  "https://blog.fleetsmith.com/rss",
+  "https://blog.google/innovation-and-ai/technology/ai/rss",
+  "https://blog.google/technology/ai/rss",
+  "https://blog.ixk.me/rss.xml",
+  "https://blog.jim-nielsen.com/feed.xml",
+  "https://blog.langchain.com/rss",
+  "https://blog.pixelmelt.dev/rss",
+  "https://blog.relentless-coding.org/feeds/posts/default",
+  "https://blog.skk.moe/atom.xml",
+  "https://blog.surajdisoja.me/feed.xml",
+  "https://bogdanthegeek.github.io/blog/index.xml",
+  "https://borretti.me/feed.xml",
+  "https://chadnauseam.com/rss.xml",
+  "https://cloudblog.withgoogle.com/rss",
+  "https://cloudsjhan.github.io/atom.xml",
+  "https://coding3min.com/feed",
+  "https://coolshell.cn/feed",
+  "https://cybersecurityventures.com/feed",
+  "https://danielchasehooper.com/feed.xml",
+  "https://danieldelaney.net/feed",
+  "https://deepmind.google/blog/rss.xml",
+  "https://dfarq.homeip.net/feed",
+  "https://einverne.github.io/feed.xml",
+  "https://en.wikipedia.org/w/api.php?hidebots=1&hidecategorization=1&hidewikibase=1&urlversion=1&days=7&limit=50&action=feedrecentchanges&feedformat=atom",
+  "https://evanhahn.com/blog/index.xml",
+  "https://evotec.xyz/blog/index.xml",
+  "https://feeds.feedburner.com/blogspot/ugxpq",
+  "https://feeds.feedburner.com/radi-v",
+  "https://feeds.feedburner.com/techyzilla",
+  "https://feeds.hanselman.com/scotthanselman",
+  "https://feeds.macrumors.com/macrumors-all",
+  "https://fetchrss.com/feed/yandxr5up8dsydbrkh4cairc.rss",
+  "https://foundation.mozilla.org/en/blog/rss",
+  "https://frame.work/blog.rss",
+  "https://garymarcus.substack.com/feed",
+  "https://geohot.github.io/blog/feed.xml",
+  "https://hnrss.org/frontpage",
+  "https://huggingface.co/blog/feed.xml",
+  "https://jayd.ml/feed.xml",
+  "https://jonlu.ca/feed.xml",
+  "https://lailin.xyz/atom.xml",
+  "https://lilianweng.github.io/index.xml",
+  "https://lkhill.com/feed/index.xml",
+  "https://matklad.github.io/feed.xml",
+  "https://maxieewong.com/atom.xml",
+  "https://medevel.com/rss",
+  "https://metalbear.com/index.xml",
+  "https://news.crunchbase.com/feed",
+  "https://oldvcr.blogspot.com/feeds/posts/default",
+  "https://openai.com/blog/rss.xml",
+  "https://openai.com/news/rss.xml",
+  "https://owncloud.com/feed",
+  "https://philiphall.com/feed",
+  "https://philiplaine.com/index.xml",
+  "https://podman-desktop.io/blog/atom.xml",
+  "https://qrz.today/index.xml",
+  "https://rss.app/feeds/75fpp0mbx9x4tbds.xml",
+  "https://rss.app/feeds/e5pq7sxrzqveifuh.xml",
+  "https://rss.app/feeds/guru8i2ldfzpwrcr.xml",
+  "https://rss.csdn.net/21cnbao/rss/map",
+  "https://rss.csdn.net/conowen/rss/map",
+  "https://rss.csdn.net/crazyleen/rss/map",
+  "https://rss.csdn.net/innost/rss/map",
+  "https://rss.csdn.net/itudou_2010/rss/map",
+  "https://rss.csdn.net/jinzhuojun/rss/map",
+  "https://rss.csdn.net/kesalin/rss/map",
+  "https://rss.csdn.net/l173864930/rss/map",
+  "https://rss.csdn.net/laczff21/rss/map",
+  "https://rss.csdn.net/leehong2005/rss/map",
+  "https://rss.csdn.net/lhj0711010212/rss/map",
+  "https://rss.csdn.net/lilu_leo/rss/map",
+  "https://rss.csdn.net/luoshengyang/rss/map",
+  "https://rss.csdn.net/melody_lu123/rss/map",
+  "https://rss.csdn.net/milado_nju/rss/map",
+  "https://rss.csdn.net/mr_raptor/rss/map",
+  "https://rss.csdn.net/nengx/rss/map",
+  "https://rss.csdn.net/nokiaguy/rss/map",
+  "https://rss.csdn.net/pxb1988/rss/map",
+  "https://rss.csdn.net/quaful/rss/map",
+  "https://rss.csdn.net/su1216/rss/map",
+  "https://rss.csdn.net/tai_yang_feng/rss/map",
+  "https://rss.csdn.net/tjxin_xd/rss/map",
+  "https://rss.csdn.net/whklhhhh/rss/map",
+  "https://rss.csdn.net/xianming01/rss/map",
+  "https://rss.csdn.net/xyz_lmn/rss/map",
+  "https://rss.csdn.net/zyc851224/rss/map",
+  "https://rsshub.app/aliyun/notice/2",
+  "https://rsshub.app/telegram/channel/botmzt",
+  "https://rsshub.app/telegram/channel/meizitu3",
+  "https://rsshub.app/telegram/channel/tastegirl",
+  "https://rsshub.app/youtube/user/%40anthropic-ai",
+  "https://rsshub.app/youtube/user/@andrejkarpathy",
+  "https://schaerli.org/weblog/rss",
+  "https://scorpiosoftware.net/feed",
+  "https://selfh.st/rss",
+  "https://simone.org/rss",
+  "https://sspai.com/feed",
+  "https://tech.meituan.com/feed",
+  "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=azurepurviewblog",
+  "https://techcrunch.com/feed",
+  "https://venturebeat.com/category/ai/feed",
+  "https://venturebeat.com/category/cloud/feed",
+  "https://ventureinsecurity.net/feed",
+  "https://vrungta.substack.com/feed",
+  "https://web3rover.substack.com/feed",
+  "https://weblogs.asp.net/scottgu/rss?containerid=13",
+  "https://wechat2rss.xlab.app/feed/eb4d04149424a874693a51c6fdda0dba8673f5e4.xml",
+  "https://worksonmymachine.ai/feed",
+  "https://worksonmymachine.substack.com/feed",
+  "https://www.aaronsw.com/2002/feeds/pgessays.rss",
+  "https://www.anildash.com/feed.xml",
+  "https://www.caida.org/caida-whatsnew.rss",
+  "https://www.chiark.greenend.org.uk/~sgtatham/quasiblog/feed.xml",
+  "https://www.construction-physics.com/feed",
+  "https://www.cyberciti.com/atom/atom.xml?cf_page_rule_rd=1",
+  "https://www.datadoghq.com/blog/index.xml",
+  "https://www.dwarkesh.com/feed",
+  "https://www.dwarkeshpatel.com/feed",
+  "https://www.gilesthomas.com/feed/rss.xml",
+  "https://www.icann.org/rss/news.rss",
+  "https://www.ifanr.com/feed",
+  "https://www.joanwestenberg.com/rss",
+  "https://www.laruence.com/feed",
+  "https://www.normaltech.ai/feed",
+  "https://www.npopov.com/rss.xml",
+  "https://www.potaroo.net/rss.xml",
+  "https://www.producthunt.com/feed",
+  "https://www.qbitai.com/feed",
+  "https://www.reddit.com/r/machinelearning/.rss",
+  "https://www.techmonitor.ai/feed",
+  "https://www.theregister.com/?lab_viewport=rss",
+  "https://www.thomasreedphoto.com/feed",
+  "https://www.webuser.co.uk/feeds/rss/news.xml",
+  "https://www.wired.com/feed/rss",
+  "https://www.youtube.com/feeds/videos.xml?channel_id=uc5qepwthlfrijhw_3xd5g2a",
+  "https://www.youtube.com/feeds/videos.xml?channel_id=uc9x0an7bwhpcdhsm9nijfjq",
+  "https://www.youtube.com/feeds/videos.xml?channel_id=ucp7wmq_u4gb3k51od9qvm0w",
+  "https://www.zdnet.com/news/rss.xml",
+  "https://www.zifangsky.cn/feed",
+  "https://xeiaso.net/blog.rss",
+  "https://yangxikun.com/rss.xml"
+ ],
+ "feeds": [
+  {
+   "feed_id": 689,
+   "category": "科技AI资讯与AI研究",
+   "title": "TechCrunch",
+   "url": "https://techcrunch.com/feed/"
+  },
+  {
+   "feed_id": 2499,
+   "category": "科技AI资讯与AI研究",
+   "title": "TechCrunch",
+   "url": "https://techcrunch.com/feed"
+  },
+  {
+   "feed_id": 695,
+   "category": "科技AI资讯与AI研究",
+   "title": "VentureBeat AI",
+   "url": "https://venturebeat.com/category/ai/feed/"
+  },
+  {
+   "feed_id": 1943,
+   "category": "科技AI资讯与AI研究",
+   "title": "VentureBeat » Cloud News",
+   "url": "http://venturebeat.com/category/cloud/feed/"
+  },
+  {
+   "feed_id": 703,
+   "category": "科技AI资讯与AI研究",
+   "title": "Wired",
+   "url": "https://www.wired.com/feed/rss"
+  },
+  {
+   "feed_id": 701,
+   "category": "科技AI资讯与AI研究",
+   "title": "爱范儿",
+   "url": "https://www.ifanr.com/feed"
+  },
+  {
+   "feed_id": 702,
+   "category": "科技AI资讯与AI研究",
+   "title": "少数派",
+   "url": "https://sspai.com/feed"
+  },
+  {
+   "feed_id": 693,
+   "category": "科技AI资讯与AI研究",
+   "title": "量子位 QbitAI",
+   "url": "https://www.qbitai.com/feed"
+  },
+  {
+   "feed_id": 700,
+   "category": "科技AI资讯与AI研究",
+   "title": "Product Hunt",
+   "url": "https://www.producthunt.com/feed"
+  },
+  {
+   "feed_id": 3147,
+   "category": "科技AI资讯与AI研究",
+   "title": "Latest news",
+   "url": "https://www.zdnet.com/news/rss.xml"
+  },
+  {
+   "feed_id": 3425,
+   "category": "科技AI资讯与AI研究",
+   "title": "The Register: Biting the hand that feeds",
+   "url": "https://www.theregister.com/?lab_viewport=rss"
+  },
+  {
+   "feed_id": 3428,
+   "category": "科技AI资讯与AI研究",
+   "title": "www.theregister.com - Articles",
+   "url": "https://api.theregister.com/api/v1/article?orderBy=published&site_id=2&remapper=rss&query=tag:security"
+  },
+  {
+   "feed_id": 3245,
+   "category": "科技AI资讯与AI研究",
+   "title": "Tech Monitor",
+   "url": "https://www.techmonitor.ai/feed"
+  },
+  {
+   "feed_id": 1677,
+   "category": "科技AI资讯与AI研究",
+   "title": "Web User | News",
+   "url": "http://www.webuser.co.uk/feeds/rss/news.xml"
+  },
+  {
+   "feed_id": 687,
+   "category": "科技AI资讯与AI研究",
+   "title": "Hacker News Frontpage",
+   "url": "https://hnrss.org/frontpage"
+  },
+  {
+   "feed_id": 691,
+   "category": "科技AI资讯与AI研究",
+   "title": "r/MachineLearning",
+   "url": "https://www.reddit.com/r/MachineLearning/.rss"
+  },
+  {
+   "feed_id": 686,
+   "category": "科技AI资讯与AI研究",
+   "title": "Google AI Blog",
+   "url": "https://blog.google/technology/ai/rss/"
+  },
+  {
+   "feed_id": 699,
+   "category": "科技AI资讯与AI研究",
+   "title": "Google DeepMind Blog",
+   "url": "https://deepmind.google/blog/rss.xml"
+  },
+  {
+   "feed_id": 684,
+   "category": "科技AI资讯与AI研究",
+   "title": "OpenAI Blog",
+   "url": "https://openai.com/blog/rss.xml"
+  },
+  {
+   "feed_id": 681,
+   "category": "科技AI资讯与AI研究",
+   "title": "OpenAI Newsroom | Engineering",
+   "url": "https://rss.app/feeds/75Fpp0Mbx9x4TbDs.xml"
+  },
+  {
+   "feed_id": 3354,
+   "category": "科技AI资讯与AI研究",
+   "title": "OpenAI News",
+   "url": "https://openai.com/news/rss.xml"
+  },
+  {
+   "feed_id": 683,
+   "category": "科技AI资讯与AI研究",
+   "title": "Hugging Face Blog",
+   "url": "https://huggingface.co/blog/feed.xml"
+  },
+  {
+   "feed_id": 676,
+   "category": "科技AI资讯与AI研究",
+   "title": "LangChain Blog",
+   "url": "https://blog.langchain.com/rss/"
+  },
+  {
+   "feed_id": 680,
+   "category": "科技AI资讯与AI研究",
+   "title": "博客 · Cursor",
+   "url": "https://rss.app/feeds/gURU8i2ldFzpwRCr.xml"
+  },
+  {
+   "feed_id": 679,
+   "category": "科技AI资讯与AI研究",
+   "title": "Engineering",
+   "url": "https://rss.app/feeds/E5pQ7SXRZQVEiFuh.xml"
+  },
+  {
+   "feed_id": 682,
+   "category": "科技AI资讯与AI研究",
+   "title": "Lil'Log",
+   "url": "https://lilianweng.github.io/index.xml"
+  },
+  {
+   "feed_id": 1470,
+   "category": "科技AI资讯与AI研究",
+   "title": "AI Snake Oil",
+   "url": "https://aisnakeoil.substack.com/feed"
+  },
+  {
+   "feed_id": 1471,
+   "category": "科技AI资讯与AI研究",
+   "title": "Chain Of Thought",
+   "url": "https://vrungta.substack.com/feed"
+  },
+  {
+   "feed_id": 3347,
+   "category": "科技AI资讯与AI研究",
+   "title": "AI",
+   "url": "https://blog.google/innovation-and-ai/technology/ai/rss/"
+  },
+  {
+   "feed_id": 3388,
+   "category": "科技AI资讯与AI研究",
+   "title": "AI as Normal Technology",
+   "url": "https://www.normaltech.ai/feed"
+  },
+  {
+   "feed_id": 3350,
+   "category": "科技AI资讯与AI研究",
+   "title": "Works on My Machine",
+   "url": "https://worksonmymachine.ai/feed"
+  },
+  {
+   "feed_id": 3344,
+   "category": "科技AI资讯与AI研究",
+   "title": "Dwarkesh Podcast",
+   "url": "https://www.dwarkesh.com/feed"
+  },
+  {
+   "feed_id": 673,
+   "category": "科技AI资讯与AI研究",
+   "title": "dwarkesh.com",
+   "url": "https://www.dwarkeshpatel.com/feed"
+  },
+  {
+   "feed_id": 3198,
+   "category": "科技AI资讯与AI研究",
+   "title": "Andrej Karpathy - YouTube",
+   "url": "rsshub://youtube/user/@AndrejKarpathy"
+  },
+  {
+   "feed_id": 3370,
+   "category": "科技AI资讯与AI研究",
+   "title": "Anthropic - YouTube",
+   "url": "rsshub://youtube/user/%40anthropic-ai"
+  },
+  {
+   "feed_id": 603,
+   "category": "科技AI资讯与AI研究",
+   "title": "garymarcus.substack.com",
+   "url": "https://garymarcus.substack.com/feed"
+  },
+  {
+   "feed_id": 608,
+   "category": "科技AI资讯与AI研究",
+   "title": "matklad.github.io",
+   "url": "https://matklad.github.io/feed.xml"
+  },
+  {
+   "feed_id": 622,
+   "category": "科技AI资讯与AI研究",
+   "title": "borretti.me",
+   "url": "https://borretti.me/feed.xml"
+  },
+  {
+   "feed_id": 626,
+   "category": "科技AI资讯与AI研究",
+   "title": "geohot.github.io",
+   "url": "https://geohot.github.io/blog/feed.xml"
+  },
+  {
+   "feed_id": 624,
+   "category": "科技AI资讯与AI研究",
+   "title": "jayd.ml",
+   "url": "https://jayd.ml/feed.xml"
+  },
+  {
+   "feed_id": 617,
+   "category": "科技AI资讯与AI研究",
+   "title": "construction-physics.com",
+   "url": "https://www.construction-physics.com/feed"
+  },
+  {
+   "feed_id": 643,
+   "category": "科技AI资讯与AI研究",
+   "title": "chadnauseam.com",
+   "url": "https://chadnauseam.com/rss.xml"
+  },
+  {
+   "feed_id": 662,
+   "category": "科技AI资讯与AI研究",
+   "title": "chiark.greenend.org.uk/~sgtatham",
+   "url": "https://www.chiark.greenend.org.uk/~sgtatham/quasiblog/feed.xml"
+  },
+  {
+   "feed_id": 638,
+   "category": "科技AI资讯与AI研究",
+   "title": "oldvcr.blogspot.com",
+   "url": "https://oldvcr.blogspot.com/feeds/posts/default"
+  },
+  {
+   "feed_id": 627,
+   "category": "科技AI资讯与AI研究",
+   "title": "paulgraham.com",
+   "url": "http://www.aaronsw.com/2002/feeds/pgessays.rss"
+  },
+  {
+   "feed_id": 629,
+   "category": "科技AI资讯与AI研究",
+   "title": "blog.jim-nielsen.com",
+   "url": "https://blog.jim-nielsen.com/feed.xml"
+  },
+  {
+   "feed_id": 630,
+   "category": "科技AI资讯与AI研究",
+   "title": "dfarq.homeip.net",
+   "url": "https://dfarq.homeip.net/feed/"
+  },
+  {
+   "feed_id": 655,
+   "category": "科技AI资讯与AI研究",
+   "title": "danieldelaney.net",
+   "url": "https://danieldelaney.net/feed"
+  },
+  {
+   "feed_id": 659,
+   "category": "科技AI资讯与AI研究",
+   "title": "blog.pixelmelt.dev",
+   "url": "https://blog.pixelmelt.dev/rss/"
+  },
+  {
+   "feed_id": 661,
+   "category": "科技AI资讯与AI研究",
+   "title": "danielchasehooper.com",
+   "url": "https://danielchasehooper.com/feed.xml"
+  },
+  {
+   "feed_id": 639,
+   "category": "科技AI资讯与AI研究",
+   "title": "bogdanthegeek.github.io",
+   "url": "https://bogdanthegeek.github.io/blog/index.xml"
+  },
+  {
+   "feed_id": 651,
+   "category": "科技AI资讯与AI研究",
+   "title": "worksonmymachine.substack.com",
+   "url": "https://worksonmymachine.substack.com/feed"
+  },
+  {
+   "feed_id": 652,
+   "category": "科技AI资讯与AI研究",
+   "title": "philiplaine.com",
+   "url": "https://philiplaine.com/index.xml"
+  },
+  {
+   "feed_id": 3200,
+   "category": "科技AI资讯与AI研究",
+   "title": "MacRumors: Mac News and Rumors - All Stories",
+   "url": "https://feeds.macrumors.com/MacRumors-All"
+  },
+  {
+   "feed_id": 600,
+   "category": "科技AI资讯与AI研究",
+   "title": "xeiaso.net",
+   "url": "https://xeiaso.net/blog.rss"
+  },
+  {
+   "feed_id": 531,
+   "category": "科技AI资讯与AI研究",
+   "title": "Web3Rover Monthly",
+   "url": "https://web3rover.substack.com/feed"
+  },
+  {
+   "feed_id": 2153,
+   "category": "融资创投与行业市场",
+   "title": "Crunchbase News",
+   "url": "https://news.crunchbase.com/feed"
+  },
+  {
+   "feed_id": 1676,
+   "category": "网络基础设施与互联网组织",
+   "title": "ICANN Announcements",
+   "url": "http://www.icann.org/rss/news.rss"
+  },
+  {
+   "feed_id": 1678,
+   "category": "网络基础设施与互联网组织",
+   "title": "Potaroo blog",
+   "url": "http://www.potaroo.net/rss.xml"
+  },
+  {
+   "feed_id": 3282,
+   "category": "网络基础设施与互联网组织",
+   "title": "CAIDA What's New",
+   "url": "https://www.caida.org/caida-whatsnew.rss"
+  },
+  {
+   "feed_id": 8,
+   "category": "开发者技术博客",
+   "title": "美团技术团队",
+   "url": "https://tech.meituan.com/feed"
+  },
+  {
+   "feed_id": 396,
+   "category": "开发者技术博客",
+   "title": "美团技术团队",
+   "url": "https://wechat2rss.xlab.app/feed/eb4d04149424a874693a51c6fdda0dba8673f5e4.xml"
+  },
+  {
+   "feed_id": 573,
+   "category": "开发者技术博客",
+   "title": "美团技术团队",
+   "url": "https://tech.meituan.com/feed/"
+  },
+  {
+   "feed_id": 1636,
+   "category": "开发者技术博客",
+   "title": "酷 壳 – CoolShell",
+   "url": "http://coolshell.cn/feed"
+  },
+  {
+   "feed_id": 122,
+   "category": "开发者技术博客",
+   "title": "风雪之隅(鸟哥)",
+   "url": "https://www.laruence.com/feed"
+  },
+  {
+   "feed_id": 76,
+   "category": "开发者技术博客",
+   "title": "Sukka's Blog",
+   "url": "https://blog.skk.moe/atom.xml"
+  },
+  {
+   "feed_id": 75,
+   "category": "开发者技术博客",
+   "title": "zifangsky的个人博客",
+   "url": "https://www.zifangsky.cn/feed"
+  },
+  {
+   "feed_id": 141,
+   "category": "开发者技术博客",
+   "title": "ARTHURCHIAO'S BLOG",
+   "url": "http://arthurchiao.art/feed.xml"
+  },
+  {
+   "feed_id": 514,
+   "category": "开发者技术博客",
+   "title": "青空之蓝",
+   "url": "https://blog.ixk.me/rss.xml"
+  },
+  {
+   "feed_id": 517,
+   "category": "开发者技术博客",
+   "title": "Fleetsmith Blog",
+   "url": "https://blog.fleetsmith.com/rss/"
+  },
+  {
+   "feed_id": 519,
+   "category": "开发者技术博客",
+   "title": "机智的程序员小熊",
+   "url": "https://coding3min.com/feed/"
+  },
+  {
+   "feed_id": 520,
+   "category": "开发者技术博客",
+   "title": "cloud world",
+   "url": "https://cloudsjhan.github.io/atom.xml"
+  },
+  {
+   "feed_id": 522,
+   "category": "开发者技术博客",
+   "title": "Mohuishou",
+   "url": "https://lailin.xyz/atom.xml"
+  },
+  {
+   "feed_id": 525,
+   "category": "开发者技术博客",
+   "title": "Verne in GitHub",
+   "url": "https://einverne.github.io/feed.xml"
+  },
+  {
+   "feed_id": 528,
+   "category": "开发者技术博客",
+   "title": "小火箭",
+   "url": "https://yangxikun.com/rss.xml"
+  },
+  {
+   "feed_id": 530,
+   "category": "开发者技术博客",
+   "title": "Maxiee Blog",
+   "url": "https://maxieewong.com/atom.xml"
+  },
+  {
+   "feed_id": 3251,
+   "category": "开发者技术博客",
+   "title": "ScottGu's Blog ",
+   "url": "https://weblogs.asp.net/scottgu/rss?containerid=13"
+  },
+  {
+   "feed_id": 3434,
+   "category": "开发者技术博客",
+   "title": "Scott Hanselman's Blog",
+   "url": "http://feeds.hanselman.com/ScottHanselman"
+  },
+  {
+   "feed_id": 3241,
+   "category": "开发者技术博客",
+   "title": "nikic's blog",
+   "url": "https://www.npopov.com/rss.xml"
+  },
+  {
+   "feed_id": 3433,
+   "category": "开发者技术博客",
+   "title": "4sysops",
+   "url": "https://4sysops.com/feed/"
+  },
+  {
+   "feed_id": 3431,
+   "category": "开发者技术博客",
+   "title": "nixCraft: Linux Tips, Hacks, Tutorials, And Ideas In Blog Format (RSS/FEED)",
+   "url": "https://www.cyberciti.com/atom/atom.xml?CF_PAGE_RULE_RD=1"
+  },
+  {
+   "feed_id": 3116,
+   "category": "开发者技术博客",
+   "title": "Blog",
+   "url": "https://evotec.xyz/blog/index.xml"
+  },
+  {
+   "feed_id": 3133,
+   "category": "开发者技术博客",
+   "title": "MetalBear | Developer Tools for AI-Powered Kubernetes Teams on",
+   "url": "https://metalbear.com/index.xml"
+  },
+  {
+   "feed_id": 2959,
+   "category": "开发者技术博客",
+   "title": "Podman Desktop Blog",
+   "url": "https://podman-desktop.io/blog/atom.xml"
+  },
+  {
+   "feed_id": 2952,
+   "category": "开发者技术博客",
+   "title": "ownCloud",
+   "url": "https://owncloud.com/feed"
+  },
+  {
+   "feed_id": 2911,
+   "category": "开发者技术博客",
+   "title": "Framework Blog",
+   "url": "https://frame.work/blog.rss"
+  },
+  {
+   "feed_id": 2913,
+   "category": "开发者技术博客",
+   "title": "Google Cloud Blog",
+   "url": "https://cloudblog.withgoogle.com/rss"
+  },
+  {
+   "feed_id": 2897,
+   "category": "开发者技术博客",
+   "title": "Datadog | The Monitor blog",
+   "url": "https://www.datadoghq.com/blog/index.xml"
+  },
+  {
+   "feed_id": 2956,
+   "category": "开发者技术博客",
+   "title": "Pavel Yosifovich",
+   "url": "https://scorpiosoftware.net/feed"
+  },
+  {
+   "feed_id": 3274,
+   "category": "开发者技术博客",
+   "title": "Relentless Coding",
+   "url": "http://blog.relentless-coding.org/feeds/posts/default"
+  },
+  {
+   "feed_id": 3275,
+   "category": "开发者技术博客",
+   "title": "Techy Zilla",
+   "url": "http://feeds.feedburner.com/TechyZilla"
+  },
+  {
+   "feed_id": 3397,
+   "category": "开发者技术博客",
+   "title": "Evan Hahn (dot com)",
+   "url": "https://evanhahn.com/blog/index.xml"
+  },
+  {
+   "feed_id": 3368,
+   "category": "开发者技术博客",
+   "title": "JonLuca's Blog",
+   "url": "https://jonlu.ca/feed.xml"
+  },
+  {
+   "feed_id": 3351,
+   "category": "开发者技术博客",
+   "title": "Giles' blog",
+   "url": "https://www.gilesthomas.com/feed/rss.xml"
+  },
+  {
+   "feed_id": 3385,
+   "category": "开发者技术博客",
+   "title": "Anil Dash",
+   "url": "https://www.anildash.com/feed.xml"
+  },
+  {
+   "feed_id": 3389,
+   "category": "开发者技术博客",
+   "title": "Westenberg.",
+   "url": "https://www.joanwestenberg.com/rss/"
+  },
+  {
+   "feed_id": 3391,
+   "category": "开发者技术博客",
+   "title": "Simone Salis",
+   "url": "https://simone.org/rss/"
+  },
+  {
+   "feed_id": 3427,
+   "category": "开发者技术博客",
+   "title": "PhilipHall.com",
+   "url": "https://philiphall.com/feed/"
+  },
+  {
+   "feed_id": 3199,
+   "category": "开发者技术博客",
+   "title": " selfh.st ",
+   "url": "https://selfh.st/rss/"
+  },
+  {
+   "feed_id": 3302,
+   "category": "开发者技术博客",
+   "title": " MEDevel.com | Open-source Apps for Healthcare and Enterprise ",
+   "url": "https://medevel.com/rss/"
+  },
+  {
+   "feed_id": 3131,
+   "category": "开发者技术博客",
+   "title": "Pascal Schärli",
+   "url": "https://schaerli.org/weblog/rss"
+  },
+  {
+   "feed_id": 560,
+   "category": "开发者技术博客",
+   "title": "公告列表-阿里云帮助中心",
+   "url": "https://rsshub.app/aliyun/notice/2"
+  },
+  {
+   "feed_id": 2875,
+   "category": "开发者技术博客",
+   "title": "Azure Purview Blog",
+   "url": "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=AzurePurviewBlog"
+  },
+  {
+   "feed_id": 3372,
+   "category": "开发者技术博客",
+   "title": "Lindsay Hill",
+   "url": "https://lkhill.com/feed/index.xml"
+  },
+  {
+   "feed_id": 3231,
+   "category": "开发者技术博客",
+   "title": "GT's Blog",
+   "url": "http://feeds.feedburner.com/blogspot/UgXPq"
+  },
+  {
+   "feed_id": 3234,
+   "category": "开发者技术博客",
+   "title": "radi::blog",
+   "url": "http://feeds.feedburner.com/radi-v"
+  },
+  {
+   "feed_id": 3242,
+   "category": "开发者技术博客",
+   "title": "surajdisoja.me",
+   "url": "https://blog.surajdisoja.me/feed.xml"
+  },
+  {
+   "feed_id": 3204,
+   "category": "开发者技术博客",
+   "title": "宋宝华",
+   "url": "https://rss.csdn.net/21cnbao/rss/map"
+  },
+  {
+   "feed_id": 3205,
+   "category": "开发者技术博客",
+   "title": "老罗的Android之旅",
+   "url": "https://rss.csdn.net/Luoshengyang/rss/map"
+  },
+  {
+   "feed_id": 3208,
+   "category": "开发者技术博客",
+   "title": "[conowen]大钟的专栏",
+   "url": "https://rss.csdn.net/conowen/rss/map"
+  },
+  {
+   "feed_id": 3219,
+   "category": "开发者技术博客",
+   "title": "Innost的专栏",
+   "url": "https://rss.csdn.net/Innost/rss/map"
+  },
+  {
+   "feed_id": 3225,
+   "category": "开发者技术博客",
+   "title": "pxb1988的专栏",
+   "url": "https://rss.csdn.net/pxb1988/rss/map"
+  },
+  {
+   "feed_id": 3227,
+   "category": "开发者技术博客",
+   "title": "HTML5, WebKit, Chromium",
+   "url": "https://rss.csdn.net/milado_nju/rss/map"
+  },
+  {
+   "feed_id": 3215,
+   "category": "开发者技术博客",
+   "title": "罗朝辉（飘飘白云）",
+   "url": "https://rss.csdn.net/kesalin/rss/map"
+  },
+  {
+   "feed_id": 3223,
+   "category": "开发者技术博客",
+   "title": "永远即等待的专栏",
+   "url": "https://rss.csdn.net/leehong2005/rss/map"
+  },
+  {
+   "feed_id": 3222,
+   "category": "开发者技术博客",
+   "title": "一个被知识诅咒的人",
+   "url": "https://rss.csdn.net/nokiaguy/rss/map"
+  },
+  {
+   "feed_id": 3129,
+   "category": "开发者技术博客",
+   "title": "su1216的专栏",
+   "url": "https://rss.csdn.net/su1216/rss/map"
+  },
+  {
+   "feed_id": 3156,
+   "category": "开发者技术博客",
+   "title": "itudou_2010的专栏",
+   "url": "https://rss.csdn.net/itudou_2010/rss/map"
+  },
+  {
+   "feed_id": 3159,
+   "category": "开发者技术博客",
+   "title": "mr_raptor的专栏",
+   "url": "https://rss.csdn.net/mr_raptor/rss/map"
+  },
+  {
+   "feed_id": 3213,
+   "category": "开发者技术博客",
+   "title": "joy",
+   "url": "https://rss.csdn.net/lhj0711010212/rss/map"
+  },
+  {
+   "feed_id": 3214,
+   "category": "开发者技术博客",
+   "title": "quaful的专栏",
+   "url": "https://rss.csdn.net/quaful/rss/map"
+  },
+  {
+   "feed_id": 3216,
+   "category": "开发者技术博客",
+   "title": "",
+   "url": "https://rss.csdn.net/xyz_lmn/rss/map"
+  },
+  {
+   "feed_id": 3217,
+   "category": "开发者技术博客",
+   "title": "",
+   "url": "https://rss.csdn.net/zyc851224/rss/map"
+  },
+  {
+   "feed_id": 3218,
+   "category": "开发者技术博客",
+   "title": "能哥的专栏",
+   "url": "https://rss.csdn.net/nengx/rss/map"
+  },
+  {
+   "feed_id": 3229,
+   "category": "开发者技术博客",
+   "title": "简行之旅",
+   "url": "https://rss.csdn.net/L173864930/rss/map"
+  },
+  {
+   "feed_id": 3230,
+   "category": "开发者技术博客",
+   "title": "",
+   "url": "https://rss.csdn.net/xianming01/rss/map"
+  },
+  {
+   "feed_id": 3232,
+   "category": "开发者技术博客",
+   "title": "芒果很香",
+   "url": "https://rss.csdn.net/laczff21/rss/map"
+  },
+  {
+   "feed_id": 3221,
+   "category": "开发者技术博客",
+   "title": "Tjxin_xd的专栏",
+   "url": "https://rss.csdn.net/Tjxin_xd/rss/map"
+  },
+  {
+   "feed_id": 3384,
+   "category": "开发者技术博客",
+   "title": "太阳风的专栏",
+   "url": "http://rss.csdn.net/tai_yang_feng/rss/map"
+  },
+  {
+   "feed_id": 3123,
+   "category": "开发者技术博客",
+   "title": "为了工作而工作是悲哀的！工作是实现自我价值的地方！",
+   "url": "https://rss.csdn.net/Melody_lu123/rss/map"
+  },
+  {
+   "feed_id": 3413,
+   "category": "开发者技术博客",
+   "title": "crazyleen专栏",
+   "url": "https://rss.csdn.net/crazyleen/rss/map"
+  },
+  {
+   "feed_id": 3366,
+   "category": "开发者技术博客",
+   "title": "whklhhhh的博客",
+   "url": "https://rss.csdn.net/whklhhhh/rss/map"
+  },
+  {
+   "feed_id": 3290,
+   "category": "开发者技术博客",
+   "title": "世事难料，保持低调",
+   "url": "http://rss.csdn.net/jinzhuojun/rss/map"
+  },
+  {
+   "feed_id": 3203,
+   "category": "开发者技术博客",
+   "title": "傲慢的上校的专栏",
+   "url": "http://rss.csdn.net/lilu_leo/rss/map"
+  },
+  {
+   "feed_id": 3330,
+   "category": "生活杂项与无关内容",
+   "title": "少女实在是太美好了 - Telegram Channel",
+   "url": "rsshub://telegram/channel/tastegirl"
+  },
+  {
+   "feed_id": 3336,
+   "category": "生活杂项与无关内容",
+   "title": "快乐星球 | 妹子图 | 收集器 - Telegram Channel",
+   "url": "rsshub://telegram/channel/botmzt"
+  },
+  {
+   "feed_id": 3340,
+   "category": "生活杂项与无关内容",
+   "title": "朱颜别镜 | 妹子图 | 美女图 - Telegram Channel",
+   "url": "rsshub://telegram/channel/meizitu3"
+  },
+  {
+   "feed_id": 3269,
+   "category": "生活杂项与无关内容",
+   "title": "Thomas Reed Photography",
+   "url": "https://www.thomasreedphoto.com/feed/"
+  },
+  {
+   "feed_id": 2812,
+   "category": "生活杂项与无关内容",
+   "title": "Sandra - Tech &amp; Lifestyle",
+   "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC5qEPWtHLFRIjhW_3xd5g2A"
+  },
+  {
+   "feed_id": 3435,
+   "category": "生活杂项与无关内容",
+   "title": "🚂QRZ的星穹列车",
+   "url": "https://qrz.today/index.xml"
+  },
+  {
+   "feed_id": 3194,
+   "category": "生活杂项与无关内容",
+   "title": "FetchRSS",
+   "url": "https://fetchrss.com/feed/YaNdxR5uP8dSYdBRKh4cairC.rss"
+  },
+  {
+   "feed_id": 3177,
+   "category": "生活杂项与无关内容",
+   "title": "Wikipedia  - Recent changes [en]",
+   "url": "https://en.wikipedia.org/w/api.php?hidebots=1&hidecategorization=1&hideWikibase=1&urlversion=1&days=7&limit=50&action=feedrecentchanges&feedformat=atom"
+  },
+  {
+   "feed_id": 2755,
+   "category": "边界组-网络科普与行业观察",
+   "title": "David Bombal",
+   "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCP7WmQ_U4GB3K51Od9QvM0w"
+  },
+  {
+   "feed_id": 2798,
+   "category": "边界组-网络科普与行业观察",
+   "title": "NetworkChuck",
+   "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC9x0AN7BWHpCDHSm9NiJFJQ"
+  },
+  {
+   "feed_id": 2943,
+   "category": "边界组-网络科普与行业观察",
+   "title": "Mozilla Foundation Blog",
+   "url": "https://foundation.mozilla.org/en/blog/rss"
+  },
+  {
+   "feed_id": 2174,
+   "category": "边界组-网络科普与行业观察",
+   "title": "Cybersecurity Ventures",
+   "url": "https://cybersecurityventures.com/feed"
+  },
+  {
+   "feed_id": 2542,
+   "category": "边界组-网络科普与行业观察",
+   "title": "Venture in Security",
+   "url": "https://ventureinsecurity.net/feed"
+  }
+ ]
+}

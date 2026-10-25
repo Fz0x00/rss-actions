@@ -1,0 +1,30 @@
+name: Prune Feeds
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry = 只打印将退订的源; apply = 实际执行退订'
+        required: false
+        default: dry
+
+permissions:
+  contents: read
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Checkout data repo
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ secrets.DATA_REPO }}
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: data
+
+      - name: Prune subscriptions
+        env:
+          PRUNE_MODE: ${{ github.event.inputs.mode }}
+        run: python3 scripts/prune_subscriptions.py data/data/accounts.db
