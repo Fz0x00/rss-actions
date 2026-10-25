@@ -42,6 +42,11 @@ def api(token, method, path, body=None, retries=3):
         try:
             req = urllib.request.Request(API_BASE + path, data=data, method=method)
             req.add_header("Content-Type", "application/json")
+            req.add_header("Accept", "application/json")
+            req.add_header("User-Agent",
+                           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                           "AppleWebKit/537.36 (KHTML, like Gecko) "
+                           "Chrome/131.0.0.0 Safari/537.36")
             req.add_header("Origin", "https://app.follow.is")
             req.add_header("Referer", "https://app.follow.is/")
             req.add_header("Cookie", "__Secure-better-auth.session_token=" + token)
