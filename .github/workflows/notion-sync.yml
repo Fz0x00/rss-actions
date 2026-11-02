@@ -1,0 +1,76 @@
+name: Notion Sync
+
+# rssFollow 高价值文章 → FLO.W 信息港口（Notion）
+# 数据源：rss-data 私有仓（checkout 到 data/）
+# 写入：Notion REST API（NOTION_TOKEN secret）
+# 调度：每日 01:30 UTC = 09:30 北京时间
+
+on:
+  schedule:
+    - cron: '30 1 * * *'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: '只预览不写入'
+        type: boolean
+        default: false
+      limit:
+        description: '只写前 N 篇（0=不限制）'
+        required: false
+        default: '0'
+      eval:
+        description: '只跑源质量评估（不写入）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notion-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout rssFollow (scripts)
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rssFollow
+          token: ${{ secrets.DATA_REPO_PAT }}
+          sparse-checkout: |
+            scripts/flow-clip-sync.py
+          sparse-checkout-cone-mode: false
+          path: app
+
+      - name: Checkout rss-data
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rss-data
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: app/packages/rss-data
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Show data files
+        run: ls -la app/packages/rss-data/data | head -20
+
+      - name: Run notion sync
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          FLOW_CLIP_DATA_DIR: ${{ github.workspace }}/app/packages/rss-data/data
+          FLOW_CLIP_STATE_FILE: ${{ github.workspace }}/flow-clip-state.json
+        run: |
+          cd app
+          if [ "${{ inputs.eval }}" = "true" ]; then
+            python3 scripts/flow-clip-sync.py --eval
+          elif [ "${{ inputs.dry }}" = "true" ]; then
+            python3 scripts/flow-clip-sync.py --dry
+          else
+            python3 scripts/flow-clip-sync.py --limit "${{ inputs.limit || '0' }}"
+          fi
