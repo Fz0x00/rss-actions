@@ -1,8 +1,9 @@
 name: Notion Sync
 
 # rssFollow 高价值文章 → FLO.W 信息港口（Notion）
-# 数据源：rss-data 私有仓（checkout 到 data/）
+# 数据源：rss-data 私有仓（checkout 到 app/packages/rss-data）
 # 写入：Notion REST API（NOTION_TOKEN secret）
+# 状态：rss-data/data/flow-clip-state.json（入库，跨运行累积 synced 统计）
 # 调度：每日 01:30 UTC = 09:30 北京时间
 
 on:
@@ -18,10 +19,6 @@ on:
         description: '只写前 N 篇（0=不限制）'
         required: false
         default: '0'
-      eval:
-        description: '只跑源质量评估（不写入）'
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -57,20 +54,32 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Show data files
-        run: ls -la app/packages/rss-data/data | head -20
-
       - name: Run notion sync
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           FLOW_CLIP_DATA_DIR: ${{ github.workspace }}/app/packages/rss-data/data
-          FLOW_CLIP_STATE_FILE: ${{ github.workspace }}/flow-clip-state.json
+          FLOW_CLIP_STATE_FILE: ${{ github.workspace }}/app/packages/rss-data/data/flow-clip-state.json
+          FLOW_CLIP_KICK_LOG: ${{ github.workspace }}/app/packages/rss-data/data/flow-clip-kick-log.json
         run: |
           cd app
-          if [ "${{ inputs.eval }}" = "true" ]; then
-            python3 scripts/flow-clip-sync.py --eval
-          elif [ "${{ inputs.dry }}" = "true" ]; then
+          if [ "${{ inputs.dry }}" = "true" ]; then
             python3 scripts/flow-clip-sync.py --dry
           else
             python3 scripts/flow-clip-sync.py --limit "${{ inputs.limit || '0' }}"
           fi
+
+      - name: Commit state back
+        if: ${{ inputs.dry != true }}
+        working-directory: app/packages/rss-data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data/flow-clip-state.json; then
+            echo "state unchanged"
+            exit 0
+          fi
+          git add data/flow-clip-state.json
+          git commit -m "auto: flow-clip sync state ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin main && break || sleep 5
+          done

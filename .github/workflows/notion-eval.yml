@@ -1,0 +1,90 @@
+name: Notion Eval
+
+# 源质量评估 + 自动踢除流水源（flow-clip-sync --eval --kick）
+# 调度：每周一 02:00 UTC = 10:00 北京时间
+# 安全闸：state 无 sources 统计时脚本会拒绝执行（防全量误踢）
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: '只评估不踢除'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notion-eval
+  cancel-in-progress: false
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout rssFollow (scripts)
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rssFollow
+          token: ${{ secrets.DATA_REPO_PAT }}
+          sparse-checkout: |
+            scripts/flow-clip-sync.py
+          sparse-checkout-cone-mode: false
+          path: app
+
+      - name: Checkout rss-data
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rss-data
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: app/packages/rss-data
+
+      - name: Download folo-account
+        run: |
+          gh release download --repo ${{ github.repository_owner }}/rss-account \
+            --pattern 'folo-account-linux-amd64' --output folo-account --clobber
+          chmod +x folo-account
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run source eval
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          FLOW_CLIP_DATA_DIR: ${{ github.workspace }}/app/packages/rss-data/data
+          FLOW_CLIP_STATE_FILE: ${{ github.workspace }}/app/packages/rss-data/data/flow-clip-state.json
+          FLOW_CLIP_KICK_LOG: ${{ github.workspace }}/app/packages/rss-data/data/flow-clip-kick-log.json
+          FLOW_CLIP_FOLO_BIN: ${{ github.workspace }}/folo-account
+          FOLO_PROXY: ''
+        run: |
+          cd app
+          if [ "${{ inputs.dry }}" = "true" ]; then
+            python3 scripts/flow-clip-sync.py --eval
+          else
+            python3 scripts/flow-clip-sync.py --eval --kick
+          fi
+
+      - name: Commit state + kick log back
+        if: ${{ inputs.dry != true }}
+        working-directory: app/packages/rss-data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          FILES=$(git diff --name-only -- data/flow-clip-state.json data/flow-clip-kick-log.json)
+          if [ -z "$FILES" ]; then
+            echo "state unchanged"
+            exit 0
+          fi
+          git add data/flow-clip-state.json data/flow-clip-kick-log.json
+          git commit -m "auto: flow-clip eval + kick ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin main && break || sleep 5
+          done
