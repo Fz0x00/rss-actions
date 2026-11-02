@@ -55,7 +55,9 @@ jobs:
         working-directory: followfetch
 
       - name: Run summarizer
+        id: run
         run: |
+          set -o pipefail
           ARGS="--time-limit ${{ github.event.inputs.time-limit || '45' }} --workers-per-key 3"
           if [ -n "${{ github.event.inputs.article-limit }}" ] && [ "${{ github.event.inputs.article-limit }}" != "0" ]; then
             ARGS="$ARGS --limit ${{ github.event.inputs.article-limit }}"
@@ -70,7 +72,12 @@ jobs:
             --articles-db data/articles.db \
             --key-db data/key.db \
             --token-db data/token.db \
-            $ARGS
+            $ARGS 2>&1 | tee /tmp/summarize.log
+          num() { grep -E "^[[:space:]]*$1:" /tmp/summarize.log | tail -1 | grep -oE '[0-9]+' | tail -1 || true; }
+          echo "processed=$(num Processed)" >> "$GITHUB_OUTPUT"
+          echo "ok=$(num OK)" >> "$GITHUB_OUTPUT"
+          echo "errors=$(num Errors)" >> "$GITHUB_OUTPUT"
+          echo "remaining=$(num Remaining)" >> "$GITHUB_OUTPUT"
         working-directory: data
 
       - name: Commit and push updated data
@@ -93,4 +100,19 @@ jobs:
               echo "Push failed, retry $i..."
               sleep 5
             done
+          fi
+
+      # 闸门放在 push 之后：本轮即使零成功，key.db 里的 last_error / 解活状态也要先落库，
+      # 再让作业变红——否则下一轮无从判断是同一把 key 在持续失败。
+      - name: Assert summarizer progress
+        run: |
+          PROCESSED="${{ steps.run.outputs.processed }}"
+          OK="${{ steps.run.outputs.ok }}"
+          ERRORS="${{ steps.run.outputs.errors }}"
+          REMAINING="${{ steps.run.outputs.remaining }}"
+          echo "### Summarize 本轮产出" >> "$GITHUB_STEP_SUMMARY"
+          echo "Processed=$PROCESSED · OK=$OK · Errors=$ERRORS · Remaining=$REMAINING" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${PROCESSED:-0}" -gt 0 ] && [ "${OK:-0}" -eq 0 ]; then
+            echo "::error::本轮摘要零成功（Processed=$PROCESSED / Errors=$ERRORS）：key 池或模型疑已失效，查 rss-data 的 key.db.api_keys.last_error"
+            exit 1
           fi
