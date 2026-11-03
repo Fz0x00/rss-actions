@@ -1,13 +1,14 @@
 name: Sync D1 to rss.db
 
-# 从 dashboard 仓迁入，复用 rss-data-rss-db 并发组，
-# 避免与 check / enrich / score-recompute 同时写 rss-data 的 rss.db。
+# 消费 dashboard 仓提交的 data/d1-export.json，把 feeds 表写回 rss.db。
+# 放在 rss-data-rss-db 并发组内，与 check / enrich / score-recompute 串行；
+# 不需要 Cloudflare D1 凭据（导出在 dashboard 仓完成）。
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '30 */6 * * *'
   workflow_dispatch:
   repository_dispatch:
-    types: [source-updated]
+    types: [sync-d1]
 
 permissions:
   contents: read
@@ -34,77 +35,33 @@ jobs:
           token: ${{ secrets.DATA_REPO_PAT }}
           path: data
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '20'
-
-      - name: Install wrangler
-        run: npm install -g wrangler
-
-      - name: Export D1 to JSON (逐行)
-        working-directory: dashboard
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      - name: Check export file
+        id: check
         run: |
-          set -x
-          wrangler --version
-
-          TOTAL_JSON=$(wrangler d1 execute rss-dashboard-db --remote --command \
-            "SELECT COUNT(*) as cnt FROM feeds" --json)
-          TOTAL=$(echo "$TOTAL_JSON" | jq '[.result[], .results[]] | flatten | .[0].cnt // 0')
-          echo "D1 feeds 总数: $TOTAL"
-          if [ "${TOTAL:-0}" -le 0 ]; then
-            echo "::error::D1 导出为 0 条（wrangler/认证/库名异常）"
-            exit 1
+          if [ ! -s data/data/d1-export.json ]; then
+            echo "d1-export.json 不存在或为空，跳过本轮"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=0" >> "$GITHUB_OUTPUT"
           fi
 
-          PAGE_SIZE=100
-          OFFSET=0
-          echo "[]" > d1_feeds.json
-
-          while [ "$OFFSET" -lt "$TOTAL" ]; do
-            echo "导出 OFFSET=$OFFSET ..."
-            wrangler d1 execute rss-dashboard-db --remote --command \
-              "SELECT id, rss_url, title, website_url, feed_type, \
-                source_categories, source_name, \
-                tag_entity_type, tag_org_type, \
-                tag_language, tag_region, tag_tech_stack, \
-                tag_confidence, last_article_at, priority_score, is_disabled \
-              FROM feeds LIMIT $PAGE_SIZE OFFSET $OFFSET" --json > page.json
-
-            PAGE_DATA=$(jq '[.result[], .results[]] | flatten' page.json)
-            PAGE_COUNT=$(echo "$PAGE_DATA" | jq 'length')
-
-            echo "本页: $PAGE_COUNT 条"
-
-            if [ "$PAGE_COUNT" -eq 0 ]; then
-              break
-            fi
-
-            jq -s '.[0] + .[1]' d1_feeds.json <(echo "$PAGE_DATA") > d1_feeds_tmp.json
-            mv d1_feeds_tmp.json d1_feeds.json
-
-            OFFSET=$((OFFSET + PAGE_SIZE))
-          done
-
-          FINAL=$(jq length d1_feeds.json)
-          echo "导出了 $FINAL 条 feeds"
-
       - name: Setup Go
+        if: steps.check.outputs.skip == '0'
         uses: actions/setup-go@v5
         with:
           go-version: '1.26'
+          cache-dependency-path: dashboard/go.sum
 
       - name: Run sync script
+        if: steps.check.outputs.skip == '0'
         working-directory: dashboard
         run: |
           go run ./scripts/sync-d1-to-rssdb/ \
-            -d1-export d1_feeds.json \
+            -d1-export ../data/data/d1-export.json \
             -rss-db ../data/data/rss.db
 
       - name: Commit and push rss-data
+        if: steps.check.outputs.skip == '0'
         run: |
           cd data
           git config user.name "github-actions[bot]"
@@ -135,7 +92,7 @@ jobs:
           fi
 
       - name: Trigger dashboard deploy
-        if: success()
+        if: success() && steps.check.outputs.skip == '0'
         run: |
           gh api repos/${{ github.repository_owner }}/rss-actions/dispatches \
             -f event_type=data-updated
