@@ -40,38 +40,35 @@ jobs:
       - name: Run aggregate
         run: |
           DAYS=${{ github.event.inputs.days || '30' }}
-          # 聚合当月和上月的 articles DB
-          MONTH=$(date -u +%Y_%m)
-          PREV_MONTH=$(date -u -d '1 month ago' +%Y_%m 2>/dev/null || date -u -v-1m +%Y_%m)
-          
-          ARGS="--days $DAYS --output data/data/daily_stats.json"
-          
-          if [ -f "data/data/articles_${MONTH}.db" ]; then
-            ARGS="$ARGS --articles-db data/data/articles_${MONTH}.db"
-          elif [ -f "data/data/articles_${PREV_MONTH}.db" ]; then
-            ARGS="$ARGS --articles-db data/data/articles_${PREV_MONTH}.db"
-          else
-            ARGS="$ARGS --articles-db data/data/articles.db"
-          fi
-          
-          ./rss-stats aggregate $ARGS
+          # 跨月合并最近 3 个月的 articles DB，避免月初 30 天统计被截断
+          DBS=""
+          for OFFSET in 0 1 2; do
+            if [ "$OFFSET" = "0" ]; then
+              M=$(date -u +%Y_%m)
+            else
+              M=$(date -u -d "$OFFSET month ago" +%Y_%m 2>/dev/null || date -u -v-${OFFSET}m +%Y_%m)
+            fi
+            [ -f "data/data/articles_${M}.db" ] && DBS="$DBS --articles-db data/data/articles_${M}.db"
+          done
+          [ -z "$DBS" ] && DBS="--articles-db data/data/articles.db"
+
+          ./rss-stats aggregate --days $DAYS --output data/data/daily_stats.json $DBS
 
       - name: Export new articles
         run: |
-          MONTH=$(date -u +%Y_%m)
-          PREV_MONTH=$(date -u -d '1 month ago' +%Y_%m 2>/dev/null || date -u -v-1m +%Y_%m)
-          
-          ARTICLES_DB=""
-          if [ -f "data/data/articles_${MONTH}.db" ]; then
-            ARTICLES_DB="data/data/articles_${MONTH}.db"
-          elif [ -f "data/data/articles_${PREV_MONTH}.db" ]; then
-            ARTICLES_DB="data/data/articles_${PREV_MONTH}.db"
-          else
-            ARTICLES_DB="data/data/articles.db"
-          fi
-          
+          DBS=""
+          for OFFSET in 0 1 2; do
+            if [ "$OFFSET" = "0" ]; then
+              M=$(date -u +%Y_%m)
+            else
+              M=$(date -u -d "$OFFSET month ago" +%Y_%m 2>/dev/null || date -u -v-${OFFSET}m +%Y_%m)
+            fi
+            [ -f "data/data/articles_${M}.db" ] && DBS="$DBS --articles-db data/data/articles_${M}.db"
+          done
+          [ -z "$DBS" ] && DBS="--articles-db data/data/articles.db"
+
           SINCE="${{ github.event.inputs.since }}"
-          ARGS="--articles-db $ARTICLES_DB --output data/data/new_articles.json"
+          ARGS="$DBS --output data/data/new_articles.json"
           
           if [ -n "$SINCE" ]; then
             ARGS="$ARGS --since $SINCE"
