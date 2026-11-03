@@ -4,7 +4,12 @@ name: Fetch + Summarize
 # 不再出现 fetch 排到下一小时甚至被 summarize 挤掉的情况。
 on:
   schedule:
-    - cron: '0 * * * *'
+    # 错开整点，减少 GitHub 调度器在 :00 的拥堵；新 workflow 的 schedule
+    # 可能几小时内都不生效，另有 workflow_run 兜底。
+    - cron: '7 * * * *'
+  workflow_run:
+    workflows: ["Deploy Dashboard"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       time-limit:
@@ -138,7 +143,7 @@ jobs:
 
       - name: Reconcile cross-month duplicates (daily 03:00 UTC)
         id: reconcile
-        if: github.event_name == 'schedule' && (github.event.schedule == '0 * * * *')
+        if: github.event_name == 'schedule' && github.event.schedule == '7 * * * *'
         run: |
           if [ "$(date -u +%H)" != "03" ]; then
             echo "skip reconcile (hour=$(date -u +%H) UTC)"
