@@ -43,6 +43,7 @@ jobs:
         run: npm install -g wrangler
 
       - name: Export D1 to JSON (逐行)
+        working-directory: dashboard
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
@@ -50,9 +51,14 @@ jobs:
           set -x
           wrangler --version
 
-          TOTAL=$(wrangler d1 execute rss-dashboard-db --remote --command \
-            "SELECT COUNT(*) as cnt FROM feeds" --json | jq '[.result[], .results[]] | flatten | .[0].cnt // 0' 2>/dev/null || echo "0")
+          TOTAL_JSON=$(wrangler d1 execute rss-dashboard-db --remote --command \
+            "SELECT COUNT(*) as cnt FROM feeds" --json)
+          TOTAL=$(echo "$TOTAL_JSON" | jq '[.result[], .results[]] | flatten | .[0].cnt // 0')
           echo "D1 feeds 总数: $TOTAL"
+          if [ "${TOTAL:-0}" -le 0 ]; then
+            echo "::error::D1 导出为 0 条（wrangler/认证/库名异常）"
+            exit 1
+          fi
 
           PAGE_SIZE=100
           OFFSET=0
@@ -68,7 +74,7 @@ jobs:
                 tag_confidence, last_article_at, priority_score, is_disabled \
               FROM feeds LIMIT $PAGE_SIZE OFFSET $OFFSET" --json > page.json
 
-            PAGE_DATA=$(jq '[.result[], .results[]] | flatten' page.json 2>/dev/null || echo "[]")
+            PAGE_DATA=$(jq '[.result[], .results[]] | flatten' page.json)
             PAGE_COUNT=$(echo "$PAGE_DATA" | jq 'length')
 
             echo "本页: $PAGE_COUNT 条"
@@ -95,7 +101,7 @@ jobs:
         working-directory: dashboard
         run: |
           go run ./scripts/sync-d1-to-rssdb/ \
-            -d1-export ../d1_feeds.json \
+            -d1-export d1_feeds.json \
             -rss-db ../data/data/rss.db
 
       - name: Commit and push rss-data
