@@ -102,9 +102,30 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "stats: update daily_stats.json and new_articles.json ($(date -u '+%Y-%m-%d %H:%M') UTC)"
+            PUSHED=0
             for i in 1 2 3; do
-              if git push; then break; fi
-              echo "Push failed, retry $i..."
+              if git pull --rebase origin main; then
+                if git push; then PUSHED=1; break; fi
+              else
+                # 这两个 JSON 每 6 小时整体重算，冲突时以远端为基底、下轮覆盖即可
+                git rebase --abort 2>/dev/null || true
+                git pull origin main --no-rebase || true
+                git checkout --theirs data/daily_stats.json 2>/dev/null || true
+                git checkout --theirs data/new_articles.json 2>/dev/null || true
+                git add data/daily_stats.json data/new_articles.json
+                # 同上：取 --theirs 后索引可能等于 HEAD，必须显式收尾合并，否则 git push 会因
+                # MERGE_HEAD 存在而拒绝执行。
+                if [ -e "$(git rev-parse --git-path MERGE_HEAD)" ]; then
+                  git commit --no-edit -m "stats: update daily_stats.json and new_articles.json (merge retry $i)"
+                else
+                  git diff --cached --quiet || git commit -m "stats: update daily_stats.json and new_articles.json (retry $i)"
+                fi
+                if git push; then PUSHED=1; break; fi
+              fi
               sleep 5
             done
+            if [ "$PUSHED" != "1" ]; then
+              echo "::error::3 次 push 均未成功，本轮统计未落库（R2 已更新，git 侧未更新）"
+              exit 1
+            fi
           fi

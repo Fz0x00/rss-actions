@@ -95,11 +95,34 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "auto: summarize articles with LLM"
+            PUSHED=0
             for i in 1 2 3; do
-              git push && break
-              echo "Push failed, retry $i..."
+              if git pull --rebase origin main; then
+                if git push; then PUSHED=1; break; fi
+              else
+                # 与别的 writer 撞上同一个库时保我方：摘要是本轮已付 LLM 成本的产物，
+                # 而缺的文章行会在下一个 fetch 周期补回（与 rss.db/accounts.db 的取舍相反）。
+                git rebase --abort 2>/dev/null || true
+                git pull origin main --no-rebase || true
+                for f in data/articles_${MONTH}.db data/key.db data/token.db; do
+                  git checkout --ours "$f" 2>/dev/null || true
+                done
+                git add $FILES_TO_ADD
+                # 取 --ours 后索引可能恰好等于 HEAD，`git diff --cached` 会判成“无改动”而跳过提交，
+                # 于是 MERGE_HEAD 悬空、后续 git push 直接拒绝执行——必须显式收尾这次合并。
+                if [ -e "$(git rev-parse --git-path MERGE_HEAD)" ]; then
+                  git commit --no-edit -m "auto: summarize articles with LLM (merge retry $i)"
+                else
+                  git diff --cached --quiet || git commit -m "auto: summarize articles with LLM (retry $i)"
+                fi
+                if git push; then PUSHED=1; break; fi
+              fi
               sleep 5
             done
+            if [ "$PUSHED" != "1" ]; then
+              echo "::error::3 次 push 均未成功，本轮摘要未落库（产出随 runner 销毁）"
+              exit 1
+            fi
           fi
 
       # 闸门放在 push 之后：本轮即使零成功，key.db 里的 last_error / 解活状态也要先落库，
