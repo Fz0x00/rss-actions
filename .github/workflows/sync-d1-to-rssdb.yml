@@ -1,0 +1,145 @@
+name: Sync D1 to rss.db
+
+# 从 dashboard 仓迁入，复用 rss-data-rss-db 并发组，
+# 避免与 check / enrich / score-recompute 同时写 rss-data 的 rss.db。
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [source-updated]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rss-data-rss-db
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout rss-dashboard (sync script)
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rss-dashboard
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: dashboard
+
+      - name: Checkout rss-data
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rss-data
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: data
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Export D1 to JSON (逐行)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          set -x
+          wrangler --version
+
+          TOTAL=$(wrangler d1 execute rss-dashboard-db --remote --command \
+            "SELECT COUNT(*) as cnt FROM feeds" --json | jq '[.result[], .results[]] | flatten | .[0].cnt // 0' 2>/dev/null || echo "0")
+          echo "D1 feeds 总数: $TOTAL"
+
+          PAGE_SIZE=100
+          OFFSET=0
+          echo "[]" > d1_feeds.json
+
+          while [ "$OFFSET" -lt "$TOTAL" ]; do
+            echo "导出 OFFSET=$OFFSET ..."
+            wrangler d1 execute rss-dashboard-db --remote --command \
+              "SELECT id, rss_url, title, website_url, feed_type, \
+                source_categories, source_name, \
+                tag_entity_type, tag_org_type, \
+                tag_language, tag_region, tag_tech_stack, \
+                tag_confidence, last_article_at, priority_score, is_disabled \
+              FROM feeds LIMIT $PAGE_SIZE OFFSET $OFFSET" --json > page.json
+
+            PAGE_DATA=$(jq '[.result[], .results[]] | flatten' page.json 2>/dev/null || echo "[]")
+            PAGE_COUNT=$(echo "$PAGE_DATA" | jq 'length')
+
+            echo "本页: $PAGE_COUNT 条"
+
+            if [ "$PAGE_COUNT" -eq 0 ]; then
+              break
+            fi
+
+            jq -s '.[0] + .[1]' d1_feeds.json <(echo "$PAGE_DATA") > d1_feeds_tmp.json
+            mv d1_feeds_tmp.json d1_feeds.json
+
+            OFFSET=$((OFFSET + PAGE_SIZE))
+          done
+
+          FINAL=$(jq length d1_feeds.json)
+          echo "导出了 $FINAL 条 feeds"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Run sync script
+        working-directory: dashboard
+        run: |
+          go run ./scripts/sync-d1-to-rssdb/ \
+            -d1-export ../d1_feeds.json \
+            -rss-db ../data/data/rss.db
+
+      - name: Commit and push rss-data
+        run: |
+          cd data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/rss.db
+          if git diff --cached --quiet; then
+            echo "无变更，跳过推送"
+          else
+            git commit -m "sync: D1 → rss.db feeds table ($(date -u '+%Y-%m-%d %H:%M') UTC)"
+            PUSHED=0
+            for i in 1 2 3; do
+              if git pull --rebase origin main; then
+                if git push; then PUSHED=1; break; fi
+              else
+                git rebase --abort 2>/dev/null || true
+                git pull origin main --no-rebase || true
+                git checkout --theirs data/rss.db 2>/dev/null || true
+                git add data/rss.db
+                git diff --cached --quiet || git commit -m "sync: D1 → rss.db (retry $i)"
+                if git push; then PUSHED=1; break; fi
+              fi
+              sleep 5
+            done
+            if [ "$PUSHED" != "1" ]; then
+              echo "::error::3 次 push 均未成功，D1 导出未落库"
+              exit 1
+            fi
+          fi
+
+      - name: Trigger dashboard deploy
+        if: success()
+        run: |
+          gh api repos/${{ github.repository_owner }}/rss-actions/dispatches \
+            -f event_type=data-updated
+        env:
+          GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
+
+  notify:
+    needs: [sync]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.sync.result }}
+    secrets: inherit
