@@ -43,3 +43,11 @@ jobs:
           git diff --cached --quiet || git commit -m "auto: update accounts.db after migration"
           git pull --rebase origin main
           git push
+
+  notify:
+    needs: [migrate]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.migrate.result }}
+    secrets: inherit

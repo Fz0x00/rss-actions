@@ -1,8 +1,7 @@
 name: Fetch Articles
 
 on:
-  schedule:
-    - cron: '0 * * * *'
+  # 定时由 pipeline.yml 统一触发（fetch → summarize 串行）；本文件仅保留手动入口。
   workflow_dispatch:
 
 permissions:
@@ -62,3 +61,11 @@ jobs:
           else
             echo "No articles file for month ${MONTH} found"
           fi
+
+  notify:
+    needs: [fetch]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.fetch.result }}
+    secrets: inherit

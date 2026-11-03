@@ -12,6 +12,8 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    outputs:
+      alive: ${{ steps.summary.outputs.alive }}
     steps:
       - name: Checkout data repo
         uses: actions/checkout@v5
@@ -35,6 +37,7 @@ jobs:
         run: ./rss-check check --db data/data/rss.db --concurrency 20
 
       - name: Export summary
+        id: summary
         run: |
           sqlite3 data/data/rss.db "
             SELECT
@@ -45,6 +48,8 @@ jobs:
             GROUP BY status
             ORDER BY count DESC;
           "
+          ALIVE=$(sqlite3 data/data/rss.db "SELECT COUNT(*) FROM feed_checks WHERE is_latest = 1 AND status = 'alive';")
+          echo "alive=$ALIVE" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push updated data
         run: |
@@ -65,3 +70,20 @@ jobs:
               if git push; then break; fi
             fi
           done
+
+  notify-zero:
+    needs: [check]
+    if: needs.check.outputs.alive == '0'
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: warning
+      detail: '健康检查异常：alive=0，疑似 checker 或数据源整体故障'
+    secrets: inherit
+
+  notify:
+    needs: [check]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.check.result }}
+    secrets: inherit

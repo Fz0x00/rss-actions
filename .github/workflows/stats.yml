@@ -126,3 +126,11 @@ jobs:
               exit 1
             fi
           fi
+
+  notify:
+    needs: [stats]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.stats.result }}
+    secrets: inherit

@@ -1,0 +1,223 @@
+name: Fetch + Summarize
+
+# 单 job 串行跑 fetch → summarize：只 checkout 一次、顺序天然正确，
+# 不再出现 fetch 排到下一小时甚至被 summarize 挤掉的情况。
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      time-limit:
+        description: 'Summarize 运行窗口（分钟）'
+        required: false
+        default: '30'
+      article-limit:
+        description: '本轮最多摘要篇数（0=由 time-limit 控制）'
+        required: false
+        default: '0'
+      fetch-limit:
+        description: '每个账号拉取条数'
+        required: false
+        default: '50'
+      workers-per-key:
+        description: '每个 key 的并发 worker 数'
+        required: false
+        default: '3'
+      key-type:
+        description: '可用 key 类型，逗号分隔（降级链）'
+        required: false
+        default: 'free,coding_plan'
+      platform:
+        description: '强制平台（留空=自动）'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rss-data-articles-db
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      zero-alert: ${{ steps.fetch.outputs.zero_alert }}
+      processed: ${{ steps.summarize.outputs.processed }}
+      ok: ${{ steps.summarize.outputs.ok }}
+      errors: ${{ steps.summarize.outputs.errors }}
+    steps:
+      - name: Checkout data repo
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ secrets.DATA_REPO }}
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: data
+
+      - name: Checkout followfetch repo
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/rss-followfetch
+          token: ${{ secrets.DATA_REPO_PAT }}
+          path: followfetch
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: followfetch/go.sum
+
+      - name: Build followfetch
+        run: go build -o followfetch-build .
+        working-directory: followfetch
+
+      - name: Run fetch
+        id: fetch
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./followfetch/followfetch-build fetch \
+            --accounts data/data/accounts.db \
+            --articles-db data/data/articles.db \
+            --db data/data/rss.db \
+            --mode auto --limit ${{ github.event.inputs.fetch-limit || '50' }} 2>&1 | tee /tmp/fetch.log
+          NEW=$(grep -E '^New articles:' /tmp/fetch.log | tail -1 | grep -oE '[0-9]+' | tail -1 || true)
+          NEW=${NEW:-0}
+          STREAK=0
+          if [ -f data/.fetch_zero_streak ]; then
+            STREAK=$(cat data/.fetch_zero_streak 2>/dev/null || echo 0)
+          fi
+          case "$STREAK" in ''|*[!0-9]*) STREAK=0 ;; esac
+          if [ "$NEW" -eq 0 ]; then
+            STREAK=$((STREAK + 1))
+          else
+            STREAK=0
+          fi
+          echo "$STREAK" > data/.fetch_zero_streak
+          echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          echo "zero_streak=$STREAK" >> "$GITHUB_OUTPUT"
+          if [ "$STREAK" -ge 3 ]; then
+            echo "zero_alert=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "zero_alert=0" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Fetch new=$NEW, zero streak=$STREAK" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run summarize
+        id: summarize
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ARGS="--time-limit ${{ github.event.inputs.time-limit || '30' }} --workers-per-key ${{ github.event.inputs.workers-per-key || '3' }}"
+          if [ -n "${{ github.event.inputs.article-limit }}" ] && [ "${{ github.event.inputs.article-limit }}" != "0" ]; then
+            ARGS="$ARGS --limit ${{ github.event.inputs.article-limit }}"
+          fi
+          if [ -n "${{ github.event.inputs.platform }}" ]; then
+            ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
+          fi
+          if [ -n "${{ github.event.inputs.key-type || 'free,coding_plan' }}" ]; then
+            ARGS="$ARGS --key-type ${{ github.event.inputs.key-type || 'free,coding_plan' }}"
+          fi
+          ../followfetch/followfetch-build summarize \
+            --articles-db data/articles.db \
+            --key-db data/key.db \
+            --token-db data/token.db \
+            $ARGS 2>&1 | tee /tmp/summarize.log
+          num() { grep -E "^[[:space:]]*$1:" /tmp/summarize.log | tail -1 | grep -oE '[0-9]+' | tail -1 || true; }
+          PROCESSED=$(num Processed); PROCESSED=${PROCESSED:-0}
+          OK=$(num OK); OK=${OK:-0}
+          ERRORS=$(num Errors); ERRORS=${ERRORS:-0}
+          REMAINING=$(num Remaining); REMAINING=${REMAINING:-0}
+          echo "processed=$PROCESSED" >> "$GITHUB_OUTPUT"
+          echo "ok=$OK" >> "$GITHUB_OUTPUT"
+          echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
+          echo "remaining=$REMAINING" >> "$GITHUB_OUTPUT"
+          echo "Summarize processed=$PROCESSED ok=$OK errors=$ERRORS remaining=$REMAINING" >> "$GITHUB_STEP_SUMMARY"
+        working-directory: data
+
+      - name: Commit and push updated data
+        if: always()
+        run: |
+          cd data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # fetch 写当月库；summarize 还会写前两个月库。全部纳入提交范围，
+          # 未改动的文件不会被 staged。
+          FILES_TO_ADD="data/key.db data/token.db .fetch_zero_streak"
+          for f in data/articles_*.db; do
+            [ -f "$f" ] && FILES_TO_ADD="$FILES_TO_ADD $f"
+          done
+          for f in data/articles_*.db.perfeed-needed; do
+            [ -f "$f" ] && FILES_TO_ADD="$FILES_TO_ADD $f"
+          done
+          git add $FILES_TO_ADD
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "auto: fetch + summarize"
+            PUSHED=0
+            for i in 1 2 3; do
+              if git pull --rebase origin main; then
+                if git push; then PUSHED=1; break; fi
+              else
+                # 摘要是本轮已付费的产物，冲突时保我方；缺的文章行下轮补。
+                git rebase --abort 2>/dev/null || true
+                git pull origin main --no-rebase || true
+                for f in data/articles_*.db data/key.db data/token.db; do
+                  git checkout --ours "$f" 2>/dev/null || true
+                done
+                git add $FILES_TO_ADD
+                if [ -e "$(git rev-parse --git-path MERGE_HEAD)" ]; then
+                  git commit --no-edit -m "auto: fetch + summarize (merge retry $i)"
+                else
+                  git diff --cached --quiet || git commit -m "auto: fetch + summarize (retry $i)"
+                fi
+                if git push; then PUSHED=1; break; fi
+              fi
+              sleep 5
+            done
+            if [ "$PUSHED" != "1" ]; then
+              echo "::error::3 次 push 均未成功，本轮产物未落库"
+              exit 1
+            fi
+          fi
+
+      - name: Assert pipeline progress
+        if: always()
+        env:
+          FETCH_OUTCOME: ${{ steps.fetch.outcome }}
+          SUMMARIZE_OUTCOME: ${{ steps.summarize.outcome }}
+          PROCESSED: ${{ steps.summarize.outputs.processed }}
+          OK: ${{ steps.summarize.outputs.ok }}
+        run: |
+          FAIL=0
+          if [ "$FETCH_OUTCOME" != "success" ]; then
+            echo "::warning::fetch 本轮失败（outcome=$FETCH_OUTCOME）"
+          fi
+          if [ "$SUMMARIZE_OUTCOME" != "success" ]; then
+            echo "::error::summarize 本轮失败（outcome=$SUMMARIZE_OUTCOME）"
+            FAIL=1
+          fi
+          if [ "${PROCESSED:-0}" -gt 0 ] && [ "${OK:-0}" -eq 0 ]; then
+            echo "::error::本轮摘要零成功（Processed=$PROCESSED / OK=$OK）：查 key.db 的 last_error"
+            FAIL=1
+          fi
+          exit $FAIL
+
+  notify-zero:
+    needs: [pipeline]
+    if: needs.pipeline.result == 'success' && needs.pipeline.outputs.zero-alert == '1'
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: warning
+      detail: 'fetch 连续 3 轮 New articles=0，疑似 Folo 账号或上游异常'
+    secrets: inherit
+
+  notify:
+    needs: [pipeline]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.pipeline.result }}
+    secrets: inherit

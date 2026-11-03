@@ -62,3 +62,11 @@ jobs:
               if git push; then break; fi
             fi
           done
+
+  notify:
+    needs: [enrich]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.enrich.result }}
+    secrets: inherit

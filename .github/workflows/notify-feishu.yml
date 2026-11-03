@@ -1,0 +1,61 @@
+name: Notify Feishu
+
+on:
+  workflow_dispatch:
+    inputs:
+      result:
+        description: 'success / failure / cancelled / warning'
+        required: false
+        default: warning
+      detail:
+        description: 'Extra text appended to the message'
+        required: false
+        default: 'notify workflow self-test'
+  workflow_call:
+    inputs:
+      result:
+        description: 'success / failure / cancelled / warning'
+        required: false
+        type: string
+        default: failure
+      detail:
+        description: 'Extra text appended to the message'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      FEISHU_WEBHOOK_URL:
+        required: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Feishu message
+        env:
+          WEBHOOK: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          RESULT: ${{ inputs.result }}
+          DETAIL: ${{ inputs.detail }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "FEISHU_WEBHOOK_URL not configured; skipping notification"
+            exit 0
+          fi
+          case "$RESULT" in
+            success) ICON="✅" ;;
+            cancelled) ICON="⚪" ;;
+            warning) ICON="⚠️" ;;
+            *) ICON="❌" ;;
+          esac
+          TEXT="$ICON $WORKFLOW [${RESULT}]"
+          if [ -n "$DETAIL" ]; then
+            TEXT="$TEXT
+          $DETAIL"
+          fi
+          TEXT="$TEXT
+          $RUN_URL"
+          jq -n --arg t "$TEXT" '{msg_type:"text",content:{text:$t}}' \
+            | curl -sS --max-time 15 -X POST "$WEBHOOK" \
+                -H 'Content-Type: application/json' -d @-

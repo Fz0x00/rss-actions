@@ -59,3 +59,11 @@ jobs:
               if git push; then break; fi
             fi
           done
+
+  notify:
+    needs: [recompute]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.recompute.result }}
+    secrets: inherit

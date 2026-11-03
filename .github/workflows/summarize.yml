@@ -1,8 +1,7 @@
 name: Summarize Articles
 
 on:
-  schedule:
-    - cron: '0 * * * *'
+  # 定时由 pipeline.yml 统一触发（fetch → summarize 串行）；本文件仅保留手动入口。
   workflow_dispatch:
     inputs:
       time-limit:
@@ -140,3 +139,11 @@ jobs:
             echo "::error::本轮摘要零成功（Processed=$PROCESSED / Errors=$ERRORS）：key 池或模型疑已失效，查 rss-data 的 key.db.api_keys.last_error"
             exit 1
           fi
+
+  notify:
+    needs: [summarize]
+    if: failure() || cancelled()
+    uses: ./.github/workflows/notify-feishu.yml
+    with:
+      result: ${{ needs.summarize.result }}
+    secrets: inherit
