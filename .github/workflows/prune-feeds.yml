@@ -1,12 +1,20 @@
 name: Prune Feeds
 
 on:
+  # 每周一 04:00 UTC 自动 dry-run，把「连续失败 >=3」的源列出来供人工抽检；
+  # apply 仍只允许手动触发。
+  schedule:
+    - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       mode:
         description: 'dry = 只打印将退订的源; apply = 实际执行退订'
         required: false
         default: dry
+      include_dynamic:
+        description: 'apply 时是否包含动态候选（连续失败 >=3）'
+        required: false
+        default: '0'
 
 permissions:
   contents: read
@@ -26,7 +34,9 @@ jobs:
 
       - name: Prune subscriptions
         env:
-          PRUNE_MODE: ${{ github.event.inputs.mode }}
+          PRUNE_MODE: ${{ github.event.inputs.mode || 'dry' }}
+          PRUNE_INCLUDE_DYNAMIC: ${{ github.event.inputs.include_dynamic || '0' }}
+          PRUNE_DYNAMIC_DB: data/data/rss.db
         run: python3 scripts/prune_subscriptions.py data/data/accounts.db
 
   notify:

@@ -31,7 +31,15 @@ jobs:
           GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
 
       - name: Run sync
-        run: ./rss-check sync --db data/data/rss.db --articles-db data/data/articles.db
+        run: |
+          test -f data/data/rss.db || { echo "::error::rss.db missing"; exit 1; }
+          ARTICLES_DB="data/data/articles_$(date -u +%Y_%m).db"
+          if [ ! -f "$ARTICLES_DB" ]; then
+            ARTICLES_DB=$(ls -1 data/data/articles_*.db 2>/dev/null | sort | tail -1)
+          fi
+          test -f "$ARTICLES_DB" || { echo "::error::no monthly articles DB"; exit 1; }
+          echo "Using articles DB: $ARTICLES_DB"
+          ./rss-check sync --db data/data/rss.db --articles-db "$ARTICLES_DB"
 
       - name: Run check
         run: ./rss-check check --db data/data/rss.db --concurrency 20

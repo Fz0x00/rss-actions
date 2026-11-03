@@ -2,7 +2,7 @@ name: Deploy Dashboard
 
 on:
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '0 */4 * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [data-updated]

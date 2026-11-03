@@ -136,6 +136,21 @@ jobs:
           echo "Summarize processed=$PROCESSED ok=$OK errors=$ERRORS remaining=$REMAINING" >> "$GITHUB_STEP_SUMMARY"
         working-directory: data
 
+      - name: Reconcile cross-month duplicates (daily 03:00 UTC)
+        id: reconcile
+        if: github.event_name == 'schedule' && (github.event.schedule == '0 * * * *')
+        run: |
+          if [ "$(date -u +%H)" != "03" ]; then
+            echo "skip reconcile (hour=$(date -u +%H) UTC)"
+            exit 0
+          fi
+          ../followfetch/followfetch-build summarize \
+            --articles-db data/articles.db \
+            --key-db data/key.db \
+            --token-db data/token.db \
+            --reconcile-duplicates-only
+        working-directory: data
+
       - name: Commit and push updated data
         if: always()
         run: |

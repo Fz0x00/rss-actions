@@ -68,10 +68,39 @@ def api(token, method, path, body=None, retries=3):
     raise last
 
 
+def load_dynamic_candidates(rss_db_path):
+    """从 rss.db 读「连续失败 >=3 且最新状态为 dead/error」的源。"""
+    if not rss_db_path or not os.path.exists(rss_db_path):
+        return set()
+    db = sqlite3.connect(rss_db_path)
+    try:
+        rows = db.execute(
+            "select f.rss_url from feeds f "
+            "join feed_checks fc on fc.feed_id = f.id and fc.is_latest = 1 "
+            "where coalesce(f.consecutive_failures, 0) >= 3 "
+            "and fc.status in ('dead', 'error') "
+            "and f.rss_url is not null and f.rss_url != ''"
+        ).fetchall()
+    except sqlite3.Error as e:
+        print("dynamic candidates: query failed: %s" % e)
+        return set()
+    finally:
+        db.close()
+    return {norm(r[0]) for r in rows if r and r[0]}
+
+
 def main():
     accounts_db = sys.argv[1] if len(sys.argv) > 1 else "data/data/accounts.db"
     with open(CUTLIST) as fp:
         cut_urls = set(json.load(fp)["cut_urls"])
+
+    dynamic_db = os.environ.get("PRUNE_DYNAMIC_DB", "")
+    # 动态候选默认只在 dry-run 显示；apply 必须显式 PRUNE_INCLUDE_DYNAMIC=1。
+    include_dynamic = DRY_RUN or os.environ.get("PRUNE_INCLUDE_DYNAMIC") == "1"
+    dynamic_urls = load_dynamic_candidates(dynamic_db) if include_dynamic else set()
+    if dynamic_urls:
+        cut_urls |= dynamic_urls
+        print("dynamic candidates (consecutive_failures>=3): %d" % len(dynamic_urls))
 
     db = sqlite3.connect(accounts_db)
     accounts = db.execute(
