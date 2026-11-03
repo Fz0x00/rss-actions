@@ -85,11 +85,12 @@ jobs:
           cd data
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          MONTH=$(date -u +%Y_%m)
+          # summarize 会同时处理当月 + 前两个月库；只提交当月会丢掉上月文章的摘要，
+          # 下一轮重复付费重算。把所有存在的月库都纳入提交范围（未改动不会被 staged）。
           FILES_TO_ADD="data/key.db data/token.db"
-          if [ -f "data/articles_${MONTH}.db" ]; then
-            FILES_TO_ADD="data/articles_${MONTH}.db $FILES_TO_ADD"
-          fi
+          for f in data/articles_*.db; do
+            [ -f "$f" ] && FILES_TO_ADD="$FILES_TO_ADD $f"
+          done
           git add $FILES_TO_ADD
           if git diff --cached --quiet; then
             echo "No changes to commit"
@@ -104,7 +105,7 @@ jobs:
                 # 而缺的文章行会在下一个 fetch 周期补回（与 rss.db/accounts.db 的取舍相反）。
                 git rebase --abort 2>/dev/null || true
                 git pull origin main --no-rebase || true
-                for f in data/articles_${MONTH}.db data/key.db data/token.db; do
+                for f in data/articles_*.db data/key.db data/token.db; do
                   git checkout --ours "$f" 2>/dev/null || true
                 done
                 git add $FILES_TO_ADD
