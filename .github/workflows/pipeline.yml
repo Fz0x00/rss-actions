@@ -129,25 +129,34 @@ jobs:
             --mode auto --limit ${{ github.event.inputs.fetch-limit || '50' }} 2>&1 | tee /tmp/fetch.log
           NEW=$(grep -E '^New articles:' /tmp/fetch.log | tail -1 | grep -oE '[0-9]+' | tail -1 || true)
           NEW=${NEW:-0}
+          EVENT="${{ github.event_name }}"
           STREAK=0
           if [ -f data/.fetch_zero_streak ]; then
             STREAK=$(cat data/.fetch_zero_streak 2>/dev/null || echo 0)
           fi
           case "$STREAK" in ''|*[!0-9]*) STREAK=0 ;; esac
-          if [ "$NEW" -eq 0 ]; then
-            STREAK=$((STREAK + 1))
-          else
+          if [ "$NEW" -ne 0 ]; then
+            # 有新增 = 上游健康，任何触发方式都清零。
             STREAK=0
+          elif [ "$EVENT" = "workflow_run" ]; then
+            # 反馈环触发的短间隔重跑几乎必然 0 新增（上一轮几十秒前刚抓完），
+            # 不计入 streak——2026-11-04 03:25–03:27 UTC 三轮 90 秒内连击就误报过
+            # 一次「Folo 账号或上游异常」。环路轮次只读不加，计数交给整点 cron。
+            echo "workflow_run 触发且 0 新增：streak=$STREAK 保持不变"
+          else
+            STREAK=$((STREAK + 1))
           fi
           echo "$STREAK" > data/.fetch_zero_streak
           echo "new=$NEW" >> "$GITHUB_OUTPUT"
           echo "zero_streak=$STREAK" >> "$GITHUB_OUTPUT"
-          if [ "$STREAK" -ge 3 ]; then
+          # 告警也只在 schedule / workflow_dispatch 上发：环路轮次不重复报警，
+          # 真实的持续零新增由整点 cron 每小时报一次。
+          if [ "$STREAK" -ge 3 ] && [ "$EVENT" != "workflow_run" ]; then
             echo "zero_alert=1" >> "$GITHUB_OUTPUT"
           else
             echo "zero_alert=0" >> "$GITHUB_OUTPUT"
           fi
-          echo "Fetch new=$NEW, zero streak=$STREAK" >> "$GITHUB_STEP_SUMMARY"
+          echo "Fetch new=$NEW, zero streak=$STREAK (event=$EVENT)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run summarize
         id: summarize
