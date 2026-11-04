@@ -3,7 +3,7 @@ name: Scheduler Canary
 # 临时探针：验证 GitHub schedule 在本仓的交付情况。调查结束即删除。
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
