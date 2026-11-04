@@ -39,13 +39,53 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: rss-data-articles-db
   cancel-in-progress: false
 
 jobs:
+  # 防反馈环：rss-data push → export.yml → Deploy Dashboard → workflow_run →
+  # 本 workflow → fetch 更新 last_article_at → 又 push……正常时 summarize 跑满
+  # 30 分钟，环 30–60 分钟才转一圈；但 key 全冷却时 summarize 秒退，环会加速到
+  # ~45 秒/轮（2026-11-04 03:25–03:55 UTC 出现过 30 分钟 41 轮的风暴，全部空转）。
+  # 因此 workflow_run 触发时检查上一轮完成时间：20 分钟内直接 skip。
+  # schedule / workflow_dispatch 不节流（手动入口和整点 cron 保持原语义）。
+  throttle:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check last pipeline completion
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "workflow_run" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "event=${{ github.event_name }}：不节流"
+            exit 0
+          fi
+          LAST=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/pipeline.yml/runs?per_page=15" \
+            --jq '[.workflow_runs[] | select(.status=="completed") | .updated_at] | max // empty' 2>/dev/null || true)
+          if [ -z "$LAST" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "查不到已完成的 run，照常执行"
+            exit 0
+          fi
+          AGE=$(( $(date -u +%s) - $(date -u -d "$LAST" +%s) ))
+          if [ "$AGE" -lt 1200 ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "节流：上一轮完成于 ${AGE}s 前（<1200s），skip 以打断 deploy→pipeline 反馈环"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "上一轮完成于 ${AGE}s 前（>=1200s），照常执行"
+          fi
+
   pipeline:
+    needs: [throttle]
+    if: needs.throttle.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
